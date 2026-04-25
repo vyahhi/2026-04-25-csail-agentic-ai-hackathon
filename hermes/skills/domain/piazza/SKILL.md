@@ -1,11 +1,11 @@
 ---
-name: piazza-readonly
+name: piazza
 description: Read-only Piazza access through the unofficial piazza-api package. Use when the user asks to inspect, search, list, or summarize Piazza posts.
 ---
 
-# Piazza Read-Only
+# Piazza
 
-This is the compatibility alias for the `piazza` skill. The repo still keeps Piazza read-only, but the helper now supports account-wide course discovery instead of requiring a fixed course id.
+Piazza has no official public API for this use case. This skill uses the unofficial `piazza-api` Python package and remains read-only in this repo.
 
 ## Rules
 
@@ -24,11 +24,7 @@ This is the compatibility alias for the `piazza` skill. The repo still keeps Pia
 ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py read POST_ID
 ```
 
-Legacy alias:
-
-```bash
-~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza-readonly.py list --limit 20
-```
+If more than one course is available, use `classes` first and then pass `--network-id` to `list` or `read` when needed.
 
 Required env:
 
@@ -49,4 +45,4 @@ Install dependency:
 ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api
 ```
 
-`PIAZZA_NETWORK_ID` is optional. If it is unset, the helper prefers the last active Piazza course or the only visible course in the account.
+`PIAZZA_NETWORK_ID` is now optional. If it is unset, the helper prefers the last active Piazza course or the only visible course in the account.

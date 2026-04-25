@@ -203,11 +203,13 @@ This installs:
 
 ```text
 hermes/skills/domain/mit-email-readonly/SKILL.md
+hermes/skills/domain/piazza/SKILL.md
 hermes/skills/domain/piazza-readonly/SKILL.md
 hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-graph.py
 hermes/scripts/mit-email-browser.py
+hermes/scripts/piazza.py
 hermes/scripts/piazza-readonly.py
 ```
 
@@ -268,8 +270,11 @@ read-only inspection:
 ```text
 PIAZZA_EMAIL=...
 PIAZZA_PASSWORD=...
-PIAZZA_NETWORK_ID=...
 ```
+
+`PIAZZA_NETWORK_ID` is optional. If it is unset, the helper prefers the last
+active course or the only visible course in the account. Use `classes` first
+when the account can see more than one course.
 
 Some Piazza classes use SSO, MFA, or captcha flows that the unofficial API may
 not support. In that case, use browser-provided export/session data instead of
@@ -326,7 +331,9 @@ Piazza helper:
 ```bash
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza-readonly.py profile'
+  '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py classes'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py list --limit 10'
 ```
 
 ### Start Hermes
