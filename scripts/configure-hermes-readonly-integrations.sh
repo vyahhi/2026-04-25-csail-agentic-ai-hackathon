@@ -22,6 +22,7 @@ SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
 FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-email-readonly/SKILL.md:.hermes/skills/domain/mit-email-readonly/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza-readonly/SKILL.md:.hermes/skills/domain/piazza-readonly/SKILL.md"
+  "$REPO_ROOT/hermes/scripts/mit-email-thunderbird.py:.hermes/scripts/mit-email-thunderbird.py"
   "$REPO_ROOT/hermes/scripts/mit-email-applemail.py:.hermes/scripts/mit-email-applemail.py"
   "$REPO_ROOT/hermes/scripts/mit-email-graph.py:.hermes/scripts/mit-email-graph.py"
   "$REPO_ROOT/hermes/scripts/mit-email-browser.py:.hermes/scripts/mit-email-browser.py"
@@ -177,15 +178,16 @@ REMOTE_CMD
 )"
 
 run_remote "$remote_env_cmd"
-run_remote "chmod +x ~/.hermes/scripts/mit-email-applemail.py ~/.hermes/scripts/mit-email-graph.py ~/.hermes/scripts/mit-email-browser.py ~/.hermes/scripts/piazza-readonly.py && ~/.hermes/scripts/mit-email-applemail.py --help >/dev/null && ~/.hermes/scripts/mit-email-graph.py --help >/dev/null"
+run_remote "chmod +x ~/.hermes/scripts/mit-email-thunderbird.py ~/.hermes/scripts/mit-email-applemail.py ~/.hermes/scripts/mit-email-graph.py ~/.hermes/scripts/mit-email-browser.py ~/.hermes/scripts/piazza-readonly.py && ~/.hermes/scripts/mit-email-thunderbird.py --help >/dev/null && ~/.hermes/scripts/mit-email-applemail.py --help >/dev/null && ~/.hermes/scripts/mit-email-graph.py --help >/dev/null"
 
-run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; else python3 -m pip install --user websocket-client >/dev/null; python3 ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; fi"
+run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-thunderbird.py profiles >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; else python3 -m pip install --user websocket-client >/dev/null; python3 ~/.hermes/scripts/mit-email-thunderbird.py profiles >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; fi"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza-readonly.py --help >/dev/null; else python3 -m pip install --user piazza-api >/dev/null; python3 ~/.hermes/scripts/piazza-readonly.py --help >/dev/null; fi"
 
 run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email-readonly|piazza-readonly' || true"
 
 echo "Read-only Hermes integrations installed."
-echo "MIT email non-browser path is Apple Mail when configured on the Mac."
+echo "MIT email non-browser path is Thunderbird when configured on the Mac."
+echo "Apple Mail remains the secondary local-client fallback."
 echo "MIT Graph auth still requires MS_GRAPH_CLIENT_ID plus: ~/.hermes/scripts/mit-email-graph.py login"
 echo "Piazza auth still requires PIAZZA_EMAIL, PIAZZA_PASSWORD, and PIAZZA_NETWORK_ID."

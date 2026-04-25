@@ -201,6 +201,7 @@ This installs:
 ```text
 hermes/skills/domain/mit-email-readonly/SKILL.md
 hermes/skills/domain/piazza-readonly/SKILL.md
+hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-graph.py
 hermes/scripts/mit-email-browser.py
@@ -209,11 +210,29 @@ hermes/scripts/piazza-readonly.py
 
 MIT Microsoft 365 mail now has three paths:
 
-1. Apple Mail local index on the Mac mini, if the MIT mailbox is configured in Mail.app.
-2. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
-3. Saved Outlook browser session as a fallback.
+1. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
+2. Apple Mail local index on the Mac mini, if the MIT mailbox is configured in Mail.app.
+3. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
+4. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
+
+Thunderbird install on the Mac mini:
+
+```bash
+scripts/install-thunderbird-on-mac-mini.sh
+```
+
+Thunderbird local-mail verification:
+
+```bash
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-thunderbird.py profiles'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-thunderbird.py mailboxes --inbox-only'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
+```
 
 Graph setup:
 
@@ -291,6 +310,8 @@ MIT email helper:
 
 ```bash
 set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-applemail.py list --limit 3'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
