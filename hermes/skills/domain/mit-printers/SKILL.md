@@ -15,7 +15,8 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 - Treat printing as a user-visible side effect. Confirm the document and destination before submitting to a local print queue unless the user has already explicitly said to print that exact file.
 - Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
 - For Pharos, the selected nearby printer is normally where the user releases the job; the submitted queue may be a central queue such as `mitprint`.
-- Do not claim a document was physically printed unless `lp` or another print command succeeded. Otherwise say it is ready to upload/release.
+- Hermes can submit and release MobilePrint jobs through the persistent Chrome session on the Mac mini when `print.mit.edu` is still authenticated. Prefer that over instruction-only responses.
+- Do not claim a document was physically printed unless `lp` or the MobilePrint browser helper succeeded. Otherwise say it is only prepared and why.
 - If the local machine is off MITnet or has no MIT print queue configured, use Athena Print Center/MobilePrint at `https://print.mit.edu` as the remote printing path and provide the nearest printer candidates.
 - The MIT KB Touchless Printing Release with MobilePrint page is the reference for remote release, but it may require MITnet or MIT VPN.
 - Use only documents or URLs the user supplied. Do not access private documents without explicit user intent.
@@ -51,6 +52,7 @@ MIT list remains available for general printer discovery.
 Use:
 
 ```bash
+~/.hermes/scripts/mit-print-browser.py print --file /path/to/document.pdf --printer stata-p
 ~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --location "building 10"
 ~/.hermes/scripts/mit-print-file.sh --url "https://example.edu/file.pdf" --location "stata"
 ~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --method mobileprint --open-mobileprint
@@ -67,7 +69,7 @@ Optional flags:
 --dry-run
 ```
 
-If `lp`, MITnet, or the queue is unavailable, the helper prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
+If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. If the persistent browser session is not authenticated, it then prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
 
 ## Telegram Attachments
 
@@ -76,7 +78,7 @@ When a user asks from Telegram to print an attached file:
 1. Locate the downloaded attachment path or URL in the current Telegram/Hermes message context.
 2. If only a Telegram URL is available, download it to a temporary file.
 3. Run `mit-print-file.sh --file ... --location ...` or `--url ...`.
-4. Prefer `--method mobileprint --open-mobileprint` for remote Pharos printing. Tell the user the document path and nearby printer candidates.
+4. Prefer `--method mobileprint --queue ...` for remote Pharos printing. That path should attempt browser-based submission/release first, then fall back to instructions only if authentication or the site flow blocks it.
 
 ## Sources
 

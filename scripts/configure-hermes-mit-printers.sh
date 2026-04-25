@@ -22,6 +22,7 @@ SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
 FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-printers/SKILL.md:.hermes/skills/domain/mit-printers/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-printer-find.py:.hermes/scripts/mit-printer-find.py"
+  "$REPO_ROOT/hermes/scripts/mit-print-browser.py:.hermes/scripts/mit-print-browser.py"
   "$REPO_ROOT/hermes/scripts/mit-print-file.sh:.hermes/scripts/mit-print-file.sh"
 )
 
@@ -118,5 +119,6 @@ for mapping in "${FILES[@]}"; do
   copy_remote "$local_path" "$remote_path"
 done
 
-run_remote "chmod +x ~/.hermes/scripts/mit-printer-find.py ~/.hermes/scripts/mit-print-file.sh && ~/.hermes/scripts/mit-printer-find.py 'building 10' --limit 3 && ~/.hermes/scripts/mit-print-file.sh --help >/dev/null"
+run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; else python3 -m pip install --user websocket-client >/dev/null; fi"
+run_remote "chmod +x ~/.hermes/scripts/mit-printer-find.py ~/.hermes/scripts/mit-print-browser.py ~/.hermes/scripts/mit-print-file.sh && ~/.hermes/scripts/mit-printer-find.py 'building 10' --limit 3 && if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-print-browser.py --help >/dev/null; else ~/.hermes/scripts/mit-print-browser.py --help >/dev/null; fi && ~/.hermes/scripts/mit-print-file.sh --help >/dev/null"
 echo "Hermes MIT printers skill configuration completed."

@@ -127,6 +127,7 @@ This installs:
 ```text
 hermes/skills/domain/mit-printers/SKILL.md
 hermes/scripts/mit-printer-find.py
+hermes/scripts/mit-print-browser.py
 hermes/scripts/mit-print-file.sh
 ```
 
@@ -137,8 +138,10 @@ off-campus Mac mini; when that happens, the helper reports the source failure
 and returns only sources it could fetch live. The Mac mini is not on the local
 MIT network, so direct printing with `lp` is attempted only if a local MIT print
 queue is configured. Remote Pharos printing uses Athena Print Center/MobilePrint
-at `https://print.mit.edu`; the helper can open that page on the Mac mini with
-`--open-mobileprint`.
+at `https://print.mit.edu`. Hermes also has a browser-backed helper that can
+upload and release jobs through the persistent Chrome session when MIT SSO is
+still valid. The shell wrapper falls back to instruction-only output only if the
+browser path is not authenticated or the site flow is blocked.
 
 Configure MIT VPN / GlobalProtect:
 

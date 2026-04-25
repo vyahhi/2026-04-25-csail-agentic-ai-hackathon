@@ -22,6 +22,7 @@ file=""
 url=""
 location=""
 queue="${MIT_PRINT_QUEUE:-mitprint}"
+queue_explicit=false
 copies=1
 duplex=false
 dry_run=false
@@ -35,7 +36,7 @@ while [[ $# -gt 0 ]]; do
     --location) location="$2"; shift 2 ;;
     --method) method="$2"; shift 2 ;;
     --open-mobileprint) open_mobileprint=true; shift ;;
-    --queue) queue="$2"; shift 2 ;;
+    --queue) queue="$2"; queue_explicit=true; shift 2 ;;
     --copies) copies="$2"; shift 2 ;;
     --duplex) duplex=true; shift ;;
     --dry-run) dry_run=true; shift ;;
@@ -94,6 +95,52 @@ print_mobileprint_instructions() {
   echo "  https://kb.mit.edu/confluence/display/istcontrib/Touchless+Printing+Release+with+MobilePrint"
 }
 
+run_mobileprint_browser() {
+  local browser_script="$HOME/.hermes/scripts/mit-print-browser.py"
+  local browser_runner=()
+  if [[ ! -f "$browser_script" ]]; then
+    print_mobileprint_instructions
+    return 0
+  fi
+  if [[ -x "$HOME/.hermes/hermes-agent/venv/bin/python" ]]; then
+    browser_runner=("$HOME/.hermes/hermes-agent/venv/bin/python" "$browser_script")
+  else
+    browser_runner=("$browser_script")
+  fi
+
+  local browser_printer=""
+  if [[ "$queue_explicit" == true && -n "$queue" && "$queue" != "mitprint" ]]; then
+    browser_printer="$queue"
+  elif [[ -n "$location" && -x "$HOME/.hermes/scripts/mit-printer-find.py" ]]; then
+    browser_printer="$("$HOME/.hermes/scripts/mit-printer-find.py" "$location" --limit 1 --json 2>/dev/null | python3 -c '
+import json, sys
+data = json.load(sys.stdin)
+results = data.get("results") or []
+if results:
+    printer = results[0]
+    candidates = (
+        printer.get("bw_hostnames")
+        or printer.get("hostnames")
+        or ([printer.get("queue")] if printer.get("queue") else [])
+        or ([printer.get("name")] if printer.get("name") else [])
+    )
+    if candidates:
+        print(str(candidates[0]).replace(".mit.edu", ""))
+')"
+  fi
+
+  local printer_arg=()
+  if [[ -n "$browser_printer" ]]; then
+    printer_arg=(--printer "$browser_printer")
+  fi
+
+  if ! "${browser_runner[@]}" print --file "$file" "${printer_arg[@]}"; then
+    local status=$?
+    print_mobileprint_instructions
+    return "$status"
+  fi
+}
+
 if [[ "$open_mobileprint" == true ]]; then
   if command -v open >/dev/null 2>&1; then
     open "https://print.mit.edu" || true
@@ -103,13 +150,13 @@ if [[ "$open_mobileprint" == true ]]; then
 fi
 
 if [[ "$method" == "mobileprint" ]]; then
-  print_mobileprint_instructions
-  exit 0
+  run_mobileprint_browser
+  exit $?
 fi
 
 if ! command -v lp >/dev/null 2>&1; then
-  print_mobileprint_instructions
-  exit 0
+  run_mobileprint_browser
+  exit $?
 fi
 
 if ! lpstat -v "$queue" >/dev/null 2>&1; then
@@ -117,8 +164,8 @@ if ! lpstat -v "$queue" >/dev/null 2>&1; then
     echo "Print queue '$queue' is not configured on this machine." >&2
     exit 1
   fi
-  print_mobileprint_instructions
-  exit 0
+  run_mobileprint_browser
+  exit $?
 fi
 
 cmd=(lp -d "$queue" -n "$copies")
