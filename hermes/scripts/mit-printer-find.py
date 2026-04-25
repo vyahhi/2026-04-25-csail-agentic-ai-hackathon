@@ -15,6 +15,20 @@ SOURCES = {
     "csail_macos": "https://tig.csail.mit.edu/print-copy-scan/macos-printing/",
 }
 
+DEPARTMENT_HINTS = {
+    "csailprivate",
+    "csail private",
+    "department",
+    "dept",
+    "local queue",
+    "queue name",
+    "private printer",
+    "internal printer",
+    "tig",
+    "wired csail",
+    "building 45",
+}
+
 
 class TableParser(HTMLParser):
     def __init__(self):
@@ -261,6 +275,17 @@ def score(printer, query):
     return total
 
 
+def wants_department_printers(query):
+    q = norm(query)
+    if not q:
+        return False
+    if any(hint in q for hint in DEPARTMENT_HINTS):
+        return True
+    if "csail" in q and any(token in q for token in {"queue", "private", "department", "45"}):
+        return True
+    return False
+
+
 def load_live_printers():
     printers = []
     failures = []
@@ -297,6 +322,7 @@ def main():
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of text.")
     parser.add_argument("--sources", action="store_true", help="Print the live source URLs and exit.")
+    parser.add_argument("--include-department", action="store_true", help="Include department-local queues such as CSAIL printers.")
     args = parser.parse_args()
 
     if args.sources:
@@ -311,11 +337,18 @@ def main():
         sys.exit(1)
 
     query = " ".join(args.query)
-    ranked = sorted(printers, key=lambda item: score(item, query), reverse=True)
+    include_department = args.include_department or wants_department_printers(query)
+    filtered = printers if include_department else [item for item in printers if item.get("type") == "pharos"]
+    ranked = sorted(filtered, key=lambda item: score(item, query), reverse=True)
     ranked = ranked[: args.limit]
 
     if args.json:
-        print(json.dumps({"results": ranked, "fetch_failures": failures, "sources": SOURCES}, indent=2))
+        print(json.dumps({
+            "results": ranked,
+            "fetch_failures": failures,
+            "sources": SOURCES,
+            "department_printers_included": include_department,
+        }, indent=2))
         return
 
     for idx, printer in enumerate(ranked, 1):

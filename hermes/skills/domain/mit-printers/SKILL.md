@@ -19,8 +19,8 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 - If the local machine is off MITnet or has no MIT print queue configured, use Athena Print Center/MobilePrint at `https://print.mit.edu` as the remote printing path and provide the nearest printer candidates.
 - The MIT KB Touchless Printing Release with MobilePrint page is the reference for remote release, but it may require MITnet or MIT VPN.
 - Use only documents or URLs the user supplied. Do not access private documents without explicit user intent.
-- For public Pharos printing near CSAIL/Stata/Building 32, prefer Stata Lobby Pharos printers first.
-- For CSAIL department printing, report the CSAIL queue name and required network: Building 32 printing requires CSAILPrivate wireless or wired CSAIL Ethernet.
+- For public MIT printer queries near CSAIL/Stata/Building 32, return only general MIT Pharos printers by default, not CSAIL department-local queues.
+- Only include CSAIL department printers when the user explicitly asks for department/private/internal CSAIL queues or queue names.
 
 ## Find Nearby Printers
 
@@ -31,6 +31,7 @@ Use the fuzzy finder:
 ~/.hermes/scripts/mit-printer-find.py "building 10"
 ~/.hermes/scripts/mit-printer-find.py "near E51"
 ~/.hermes/scripts/mit-printer-find.py "csail" --json
+~/.hermes/scripts/mit-printer-find.py "csail private queue" --include-department
 ```
 
 The helper fetches remote sources on every run:
