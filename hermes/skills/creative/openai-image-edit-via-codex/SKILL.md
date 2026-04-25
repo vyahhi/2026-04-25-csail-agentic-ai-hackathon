@@ -169,25 +169,25 @@ After generation:
    - fidelity to the source composition
    - suitability for the requested transformed style
 
+## Speed / Optimization Guidance
+
+For repeated workflows like "same, coloring page and print in stata":
+- Do not run `vision_analyze` on the source image unless it is actually needed for prompt refinement, ambiguity resolution, or debugging.
+- If the user already supplied the image and the transformation goal is clear, go straight to the Codex image-edit script.
+- Keep `vision_analyze` primarily for post-generation QA on the output image.
+- If the print helper fails, use the existing CDP fallback only after the normal browser helper path fails.
+
+This means the fast path is usually:
+1. image edit via Codex
+2. output QA with `vision_analyze`
+3. print via browser helper
+4. CDP recovery only if needed
+
 Suggested verification questions:
 - "Is this a faithful coloring-book conversion of the original photo?"
 - "Is this clean black-and-white line art suitable for coloring?"
 
-## Speed Guidance
-
-For repeated workflows like "same, coloring page and print in stata":
-- do not run `vision_analyze` on the source image unless it is actually needed for prompt refinement, ambiguity resolution, or debugging
-- if the edit goal is already clear, go straight to the Codex image-edit script
-- use `vision_analyze` primarily for post-generation QA on the output image
-- if printing fails, fall back to CDP/browser recovery only after the normal print helper fails
-
-The usual fast path is:
-1. image edit via Codex
-2. output QA with `vision_analyze`
-3. print via the browser helper
-4. CDP recovery only if needed
-
-Important: if the user asks whether the result came from real image editing versus a descriptive redraw, answer explicitly. The generation should come from the source-image Codex/OpenAI edit flow; `vision_analyze` is only for inspection or QA.
+Important: `vision_analyze` here is for QA only, not for generation. If the user asks whether you used image editing versus description-based redraw, state this explicitly: the transformation was produced from the source image by the Codex/OpenAI image-edit flow, while `vision_analyze` was only used to inspect the source or verify the result.
 
 ## Optional config improvement
 
