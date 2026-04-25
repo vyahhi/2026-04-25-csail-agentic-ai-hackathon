@@ -201,12 +201,21 @@ This installs:
 ```text
 hermes/skills/domain/mit-email-readonly/SKILL.md
 hermes/skills/domain/piazza-readonly/SKILL.md
+hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-graph.py
+hermes/scripts/mit-email-browser.py
 hermes/scripts/piazza-readonly.py
 ```
 
-MIT email uses Microsoft Graph delegated `Mail.Read`. Add a public-client
-Microsoft app ID to `.env`, then run device-code login on the Mac mini:
+MIT Microsoft 365 mail now has three paths:
+
+1. Apple Mail local index on the Mac mini, if the MIT mailbox is configured in Mail.app.
+2. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
+3. Saved Outlook browser session as a fallback.
+
+Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
+
+Graph setup:
 
 ```text
 MS_GRAPH_CLIENT_ID=...
@@ -219,6 +228,17 @@ set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-graph.py login'
 ```
+
+Apple Mail setup and verification:
+
+```bash
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-applemail.py mailboxes'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-applemail.py list --limit 3'
+```
+
+If Mail.app is not configured with the MIT Microsoft 365 account yet, the helper exits cleanly and tells Hermes to configure Mail first.
 
 Piazza uses the unofficial `piazza-api` package and is configured only for
 read-only inspection:
@@ -271,6 +291,8 @@ MIT email helper:
 
 ```bash
 set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-applemail.py list --limit 3'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-graph.py folders'
 ```
