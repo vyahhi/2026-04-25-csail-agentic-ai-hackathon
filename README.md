@@ -67,7 +67,16 @@ scripts/deploy-hermes-mac-mini.sh
 ```
 
 The deploy script runs the official Hermes installer with `--skip-setup` and
-verifies the remote `hermes` command with `hermes doctor`.
+verifies the remote `hermes` command with `hermes doctor`. It also syncs:
+
+```text
+hermes/SOUL.md
+hermes/memories/MEMORY.md
+hermes/memories/USER.md
+```
+
+Those files define the durable MIT-personal-assistant persona and stable
+machine-local operating notes for the live Hermes instance.
 
 Configure Hermes to use local ChatGPT/Codex OAuth credentials:
 

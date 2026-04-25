@@ -25,6 +25,42 @@ if ! command -v expect >/dev/null 2>&1; then
   exit 1
 fi
 
+copy_remote() {
+  local local_path="$1"
+  local remote_path="$2"
+
+  SSH_USER="$SSH_USER" SSH_HOST="$SSH_HOST" SSH_PASSWORD="$SSH_PASSWORD" LOCAL_PATH="$local_path" REMOTE_PATH="$remote_path" expect <<'EXPECT_EOF'
+    log_user 0
+    set timeout -1
+    set sent_login 0
+    spawn scp -q -o StrictHostKeyChecking=accept-new $env(LOCAL_PATH) $env(SSH_USER)@$env(SSH_HOST):$env(REMOTE_PATH)
+    log_user 1
+    expect {
+      -glob "*Password:*" {
+        if {$sent_login == 0} {
+          send "$env(SSH_PASSWORD)\r"
+          set sent_login 1
+        }
+        exp_continue
+      }
+      -glob "*password:*" {
+        if {$sent_login == 0} {
+          send "$env(SSH_PASSWORD)\r"
+          set sent_login 1
+        }
+        exp_continue
+      }
+      -glob "*Permission denied*" {
+        exit 13
+      }
+      eof {
+        catch wait result
+        exit [lindex $result 3]
+      }
+    }
+EXPECT_EOF
+}
+
 run_remote() {
   local remote_cmd="$1"
 
@@ -57,6 +93,11 @@ echo "Deploying Hermes Agent to $SSH_USER@$SSH_HOST"
 run_remote "hostname; whoami; sw_vers -productVersion"
 
 run_remote "curl -fsSL '$INSTALL_URL' | bash -s -- --skip-setup"
+
+run_remote "mkdir -p ~/.hermes/memories"
+copy_remote "$REPO_ROOT/hermes/SOUL.md" ".hermes/SOUL.md"
+copy_remote "$REPO_ROOT/hermes/memories/MEMORY.md" ".hermes/memories/MEMORY.md"
+copy_remote "$REPO_ROOT/hermes/memories/USER.md" ".hermes/memories/USER.md"
 
 run_remote "export PATH=\"\$HOME/.local/bin:\$PATH\"; command -v hermes; hermes --help >/dev/null; hermes doctor || true"
 
