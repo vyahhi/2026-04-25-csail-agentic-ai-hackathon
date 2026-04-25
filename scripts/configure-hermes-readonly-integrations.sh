@@ -120,7 +120,7 @@ copy_remote() {
 EXPECT_EOF
 }
 
-echo "Configuring read-only Hermes integrations on $SSH_USER@$SSH_HOST"
+echo "Configuring Hermes integrations on $SSH_USER@$SSH_HOST"
 run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email-readonly ~/.hermes/skills/domain/piazza ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
 
 for mapping in "${FILES[@]}"; do
@@ -189,7 +189,7 @@ run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.
 
 run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email-readonly|piazza' || true"
 
-echo "Read-only Hermes integrations installed."
+echo "Hermes integrations installed."
 echo "MIT email non-browser path on this Mac mini is Apple Mail when Mail.app is configured."
 echo "Thunderbird remains an optional secondary local-client path."
 echo "MIT Graph auth still requires MS_GRAPH_CLIENT_ID plus: ~/.hermes/scripts/mit-email-graph.py login"

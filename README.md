@@ -222,7 +222,7 @@ Useful remote commands:
 Configure MIT email and Piazza helpers:
 
 ```bash
-scripts/configure-hermes-readonly-integrations.sh
+scripts/configure-hermes-integrations.sh
 ```
 
 This installs:
@@ -378,7 +378,7 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 If Piazza reports `Missing piazza-api`, rerun:
 
 ```bash
-scripts/configure-hermes-readonly-integrations.sh
+scripts/configure-hermes-integrations.sh
 ```
 
 That install step is what provisions the `piazza-api` dependency into the Hermes
