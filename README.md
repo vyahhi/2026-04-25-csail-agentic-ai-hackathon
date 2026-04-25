@@ -55,6 +55,24 @@ the Mac mini, imports OpenAI Codex OAuth into Hermes, and updates
 If Hermes asks for device login, open the shown OpenAI URL locally and enter the
 displayed code.
 
+Configure Telegram:
+
+```bash
+scripts/configure-hermes-telegram.sh
+```
+
+Required `.env` values:
+
+```text
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_ALLOWED_USERS=152157536
+TELEGRAM_HOME_CHANNEL=152157536
+```
+
+`TELEGRAM_ALLOWED_USERS` and `TELEGRAM_HOME_CHANNEL` must be numeric Telegram
+user or chat IDs, not `@username` handles. Message @userinfobot to find your
+numeric user ID, or send `/start` to the bot and inspect Bot API updates.
+
 ### Verify
 
 ```bash
@@ -89,6 +107,14 @@ Gateway setup for messaging integrations:
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   'export PATH="/opt/homebrew/bin:$HOME/.local/bin:$PATH"; hermes gateway setup'
+```
+
+Install/start the Hermes gateway service after Telegram is configured:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  'export PATH="/opt/homebrew/bin:$HOME/.local/bin:$PATH"; hermes gateway install && hermes gateway start && hermes gateway status'
 ```
 
 ### Notes
