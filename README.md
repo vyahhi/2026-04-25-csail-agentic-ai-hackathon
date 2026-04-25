@@ -159,6 +159,38 @@ hermes/skills/domain/mit-vpn-globalprotect/SKILL.md
 hermes/scripts/mit-vpn-globalprotect.sh
 ```
 
+Configure Hermes to reuse a persistent Chrome profile for MIT SSO:
+
+```bash
+scripts/configure-hermes-browser-cdp.sh
+```
+
+This installs:
+
+```text
+hermes/scripts/persistent-browser-cdp.sh
+```
+
+and updates `~/.hermes/config.yaml` with:
+
+```text
+browser:
+  cdp_url: "http://127.0.0.1:9222"
+```
+
+Hermes browser tools then connect to a persistent live Chrome instance on the
+Mac mini instead of launching a fresh headless profile each time. That lets MIT
+Touchstone/Okta/Duo cookies survive across Hermes browser tasks for as long as
+the underlying MIT session remains valid.
+
+Useful remote commands:
+
+```bash
+~/.hermes/scripts/persistent-browser-cdp.sh start
+~/.hermes/scripts/persistent-browser-cdp.sh status
+~/.hermes/scripts/persistent-browser-cdp.sh stop
+```
+
 Configure read-only MIT email and Piazza helpers:
 
 ```bash
