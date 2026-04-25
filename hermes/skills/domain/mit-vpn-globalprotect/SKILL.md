@@ -9,7 +9,7 @@ MIT VPN uses Prisma Access GlobalProtect with portal `gpvpn.mit.edu`.
 
 ## Rules
 
-- Use `~/.hermes/scripts/mit-vpn-globalprotect.sh` for status, open, connect, and MIT KB tests.
+- Use `~/.hermes/scripts/mit-vpn-globalprotect.sh` for status, install, open, connect, and MIT KB tests.
 - Login requires interactive MIT Kerberos and Duo approval. Do not claim VPN is connected until status or MIT KB access verifies it.
 - Do not print passwords, Kerberos credentials, Duo codes, or session cookies.
 - If GlobalProtect is not installed, open `https://gpvpn.mit.edu` on the Mac mini desktop and tell the user to complete installer download/login there.
@@ -19,6 +19,7 @@ MIT VPN uses Prisma Access GlobalProtect with portal `gpvpn.mit.edu`.
 
 ```bash
 ~/.hermes/scripts/mit-vpn-globalprotect.sh status
+~/.hermes/scripts/mit-vpn-globalprotect.sh install
 ~/.hermes/scripts/mit-vpn-globalprotect.sh open-portal
 ~/.hermes/scripts/mit-vpn-globalprotect.sh open-app
 ~/.hermes/scripts/mit-vpn-globalprotect.sh connect

@@ -3,11 +3,13 @@ set -euo pipefail
 
 portal="${MIT_VPN_PORTAL:-gpvpn.mit.edu}"
 action="${1:-status}"
+download_url="https://${portal}/global-protect/getmsi.esp?version=none&platform=mac"
 
 usage() {
   cat <<'USAGE'
 Usage:
   mit-vpn-globalprotect.sh status
+  mit-vpn-globalprotect.sh install
   mit-vpn-globalprotect.sh open-portal
   mit-vpn-globalprotect.sh open-app
   mit-vpn-globalprotect.sh connect
@@ -54,6 +56,21 @@ status() {
   else
     echo "GlobalProtect process: not running"
   fi
+}
+
+install_app() {
+  if [[ -d /Applications/GlobalProtect.app ]]; then
+    echo "GlobalProtect app is already installed."
+    return 0
+  fi
+
+  tmp_pkg="$(mktemp /tmp/globalprotect.XXXXXX.pkg)"
+  trap 'rm -f "$tmp_pkg"' RETURN
+  echo "Downloading GlobalProtect package from $download_url"
+  curl -fL "$download_url" -o "$tmp_pkg"
+  echo "Installing GlobalProtect package."
+  sudo installer -pkg "$tmp_pkg" -target /
+  echo "GlobalProtect installation finished."
 }
 
 open_portal() {
@@ -103,6 +120,7 @@ PY
 
 case "$action" in
   status) status ;;
+  install) install_app ;;
   open-portal) open_portal ;;
   open-app) open_app ;;
   connect) connect_vpn ;;
