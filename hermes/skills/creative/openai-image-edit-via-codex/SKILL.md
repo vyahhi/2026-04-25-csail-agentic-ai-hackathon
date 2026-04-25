@@ -169,12 +169,12 @@ After generation:
    - fidelity to the source composition
    - suitability for the requested transformed style
 
-## Speed / Optimization Guidance
+## Speed / optimization guidance
 
 For repeated workflows like "same, coloring page and print in stata":
-- Do not run `vision_analyze` on the source image unless it is actually needed for prompt refinement, ambiguity resolution, or debugging.
+- Do **not** run `vision_analyze` on the source image unless it is actually needed for prompt refinement, ambiguity resolution, or debugging.
 - If the user already supplied the image and the transformation goal is clear, go straight to the Codex image-edit script.
-- Keep `vision_analyze` primarily for post-generation QA on the output image.
+- Keep `vision_analyze` primarily for **post-generation QA** on the output image.
 - If the print helper fails, use the existing CDP fallback only after the normal browser helper path fails.
 
 This means the fast path is usually:

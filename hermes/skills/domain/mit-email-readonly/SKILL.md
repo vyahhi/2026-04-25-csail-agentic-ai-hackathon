@@ -1,76 +1,55 @@
 ---
 name: mit-email-readonly
-description: Read-only access guidance for the user's MIT Microsoft 365 mailbox via Thunderbird, Apple Mail, Microsoft Graph Mail.Read, or a saved Outlook session. Use when the user asks to inspect, search, summarize, or read MIT email.
+description: Read-only access guidance for the user's MIT Microsoft 365 mailbox. Prefer local Apple Mail data and fall back to a saved Outlook browser session only when needed.
 ---
 
 # MIT Email Read-Only
 
-MIT email is Microsoft 365/Outlook. On this Mac mini, prefer Apple Mail local access first because Mail.app is configured and readable. Thunderbird is optional and should be treated as a secondary local-client path unless it is explicitly configured for the MIT mailbox. Otherwise prefer Microsoft Graph with delegated `Mail.Read` over IMAP password auth.
+MIT email is Microsoft 365/Outlook.
 
 ## Rules
 
 - Read-only by default. Do not send, reply, forward, delete, archive, move, mark read/unread, or create rules.
-- Use Apple Mail local access first when the mailbox is configured on the Mac.
-- Otherwise use Thunderbird local access when the mailbox is configured on the Mac.
-- Otherwise use Microsoft Graph `Mail.Read` helper when configured.
-- If neither Thunderbird, Apple Mail, nor Graph is available, use the Outlook browser-session helper before telling the user email is unavailable.
+- Prefer local mailbox data over browser access.
+- On this Mac mini, prefer Apple Mail first when it is configured and readable.
+- Use the Outlook browser-session helper only as fallback.
 - Do not expose OAuth tokens.
-- Summarize mail content carefully; quote only short snippets when needed.
-- Only ask the user to run Graph device-code login if both Graph and the persistent Outlook session are unavailable.
+- Summarize mail carefully; quote only short snippets when needed.
 
-## Helper
+## Default workflow
+
+1. Try Apple Mail local access:
 
 ```bash
 ~/.hermes/scripts/mit-email-applemail.py mailboxes
 ~/.hermes/scripts/mit-email-applemail.py list --limit 10
-~/.hermes/scripts/mit-email-thunderbird.py profiles
-~/.hermes/scripts/mit-email-thunderbird.py mailboxes --inbox-only
-~/.hermes/scripts/mit-email-thunderbird.py list --limit 10
-~/.hermes/scripts/mit-email-graph.py login
-~/.hermes/scripts/mit-email-graph.py me
-~/.hermes/scripts/mit-email-graph.py folders
-~/.hermes/scripts/mit-email-graph.py list --limit 10
-~/.hermes/scripts/mit-email-graph.py list --search "canvas" --limit 10
-~/.hermes/scripts/mit-email-graph.py read MESSAGE_ID
-~/.hermes/scripts/mit-email-browser.py list --limit 3
 ```
 
-Required env:
-
-```text
-MS_GRAPH_CLIENT_ID=...
-MS_GRAPH_TENANT=organizations
-MS_GRAPH_SCOPES=offline_access User.Read Mail.Read
-```
-
-The Graph helper saves tokens to `~/.hermes/auth/ms-graph-token.json`.
-
-## Notes
-
-Raw IMAP/SMTP support exists in Hermes, but Microsoft 365 commonly requires Modern Auth/OAuth2. Avoid storing MIT account passwords for mailbox access.
-
-If Apple Mail is configured on the Mac mini with the MIT Microsoft 365 account, use:
+2. If Apple Mail direct SQLite access is blocked with an error like `sqlite3.DatabaseError: authorization denied`, use the updated helper anyway — it automatically falls back to read-only AppleScript queries against the Mail app:
 
 ```bash
 ~/.hermes/scripts/mit-email-applemail.py mailboxes
-~/.hermes/scripts/mit-email-applemail.py list --limit 3
+~/.hermes/scripts/mit-email-applemail.py list --limit 10
 ```
 
-That is the preferred non-browser path for this machine because it reads the local Apple Mail index instead of depending on a live browser session.
-
-If Thunderbird is configured on the Mac mini with the MIT Microsoft 365 account, use:
+3. If Mail AppleScript calls begin failing with `AppleEvent timed out (-1712)`, relaunch Mail and retry:
 
 ```bash
-~/.hermes/scripts/mit-email-thunderbird.py profiles
-~/.hermes/scripts/mit-email-thunderbird.py list --limit 3
+pkill -x Mail || true
+open -a Mail
+~/.hermes/scripts/mit-email-applemail.py list --limit 10
 ```
 
-That is a secondary non-browser path because it reads Thunderbird's local mailboxes without depending on a live browser session.
-
-If Microsoft Graph is not configured but the persistent Hermes Chrome profile is already authenticated to Outlook Web, use:
+4. Only if Apple Mail access fails at both the SQLite and AppleScript layers, fall back to the Outlook browser-session helper:
 
 ```bash
 ~/.hermes/scripts/mit-email-browser.py list --limit 3
 ```
 
-That path is still read-only, but it depends on the saved Outlook browser session rather than native Graph OAuth.
+## Notes
+
+- Raw IMAP/SMTP support exists in Hermes, but Microsoft 365 commonly requires Modern Auth/OAuth2. Avoid storing MIT account passwords for mailbox access.
+- `~/.hermes/scripts/mit-email-applemail.py` reads Apple Mail's local `Envelope Index` SQLite database. On macOS, this may fail with `authorization denied` if the current session lacks the required Mail/Full Disk Access permissions.
+- The Apple Mail helper now has a practical read-only fallback path through AppleScript when direct SQLite access is blocked.
+- Apple Mail is the intended primary path for this user's MIT mailbox on this Mac mini.
+- Thunderbird and Microsoft Graph are intentionally omitted from the normal workflow for this user.

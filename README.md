@@ -219,7 +219,7 @@ Useful remote commands:
 ~/.hermes/scripts/persistent-browser-cdp.sh stop
 ```
 
-Configure read-only MIT email and Piazza helpers:
+Configure MIT email and Piazza helpers:
 
 ```bash
 scripts/configure-hermes-readonly-integrations.sh
@@ -231,13 +231,11 @@ This installs:
 hermes/skills/email/himalaya/SKILL.md
 hermes/skills/domain/mit-email-readonly/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
-hermes/skills/domain/piazza-readonly/SKILL.md
 hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-graph.py
 hermes/scripts/mit-email-browser.py
 hermes/scripts/piazza.py
-hermes/scripts/piazza-readonly.py
 ```
 
 MIT Microsoft 365 mail now has three paths:
@@ -302,8 +300,9 @@ The helper first tries the local Apple Mail SQLite index. If that path is blocke
 by macOS permissions, it can fall back to read-only AppleScript queries against
 Mail.app.
 
-Piazza uses the unofficial `piazza-api` package and is configured only for
-read-only inspection:
+Piazza uses the unofficial `piazza-api` package. The helper supports account-wide
+course discovery first, and the current remote skill also allows explicit
+state-changing Piazza actions when the user asks for them:
 
 ```text
 PIAZZA_EMAIL=...

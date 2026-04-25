@@ -69,7 +69,7 @@ Optional flags:
 --dry-run
 ```
 
-If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. Run that helper from the Hermes repo venv rather than system Python, because the browser/CDP dependencies may only exist there:
+If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. Run the browser helper from the Hermes repo venv, not system Python, because the working environment may only have the required websocket/browser dependencies there:
 
 ```bash
 source ~/.hermes/hermes-agent/venv/bin/activate && python ~/.hermes/scripts/mit-print-browser.py print --file /absolute/path/to/file.pdf --printer stata-p
@@ -77,25 +77,27 @@ source ~/.hermes/hermes-agent/venv/bin/activate && python ~/.hermes/scripts/mit-
 
 If the persistent browser session is not authenticated, it then prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
 
-### CDP Fallback
+### CDP fallback when the browser helper stalls
 
-If the browser helper stalls after upload, use the live persistent browser session as a recovery path instead of giving up. Typical failure signals are:
+The My Print Center automation can fail even after upload succeeds, commonly with messages like:
 - `Could not reach the print confirmation dialog.`
 - `Uploaded file ... did not become ready in My Print Center.`
 
-Recovery flow:
-1. Find the active `print.mit.edu` tab in the persistent browser.
-2. Inspect live page state through DOM/CDP to confirm the uploaded filename, current destination, visible dialogs, and current quota.
-3. Clear blocking `OK` dialogs or stale confirmation modals.
-4. Select the uploaded job row explicitly if it is present but not selected.
-5. Click the page `Print` button.
-6. If the Pharos confirmation dialog appears, click `Confirm`.
-7. Verify success before claiming it:
+When that happens, use the live persistent browser session plus `browser_cdp` as a recovery path instead of giving up:
+
+1. Find the active `print.mit.edu` tab with `Target.getTargets`.
+2. Inspect page state with `Runtime.evaluate` to read the title/body text, visible buttons, current quota, and whether the uploaded filename appears in the jobs table.
+3. If needed, click `Refresh` or `OK` style controls in page DOM.
+4. If the uploaded row is present but not selected, programmatically check/select its checkbox.
+5. Click the page `Print` button via DOM script.
+6. If a Pharos confirmation dialog appears, click `Confirm` via DOM script.
+7. Verify success by re-reading page state. Strong success signals are:
    - the uploaded file row disappears
    - page shows `There is no data` / `No items to display`
-   - or quota decreases by the document cost
+   - `hasFile:false` in your DOM probe
+   - print quota decreases by the document cost
 
-Do not say the print succeeded unless the normal helper or the CDP fallback actually verified it.
+Do not say the job printed successfully until one of the helper flows or the CDP fallback is actually verified.
 
 ## Telegram Attachments
 
