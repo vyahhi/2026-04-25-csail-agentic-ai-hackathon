@@ -10,7 +10,7 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 ## Operating Rules
 
 - The configured Mac mini is not on the local MIT network. Do not assume it can reach MIT-only printers, MITnet-only KB pages, or department print queues directly.
-- Always use live source lookup through `mit-printer-find.py`. Do not use or create a local cached printer dataset.
+- Use `mit-printer-find.py`, which includes a bundled public MIT printer baseline and augments it with live source lookup when available. Do not create a separate local cached printer dataset.
 - If a live source redirects to an access-restricted page from the off-campus Mac mini, report that source failure and use only the sources that were actually fetched.
 - Treat printing as a user-visible side effect. Confirm the document and destination before submitting to a local print queue unless the user has already explicitly said to print that exact file.
 - Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
@@ -34,15 +34,17 @@ Use the fuzzy finder:
 ~/.hermes/scripts/mit-printer-find.py "csail private queue" --include-department
 ```
 
-The helper fetches remote sources on every run:
+The helper uses a bundled public MIT printer list and also fetches remote sources on every run:
 
 ```text
+bundled public MIT printer list in repo
 https://kb.mit.edu/confluence/display/mitcontrib/MIT+Printer+Locations
 https://tig.csail.mit.edu/print-copy-scan/macos-printing/
 ```
 
 The MIT KB Pharos page may be access-restricted from outside MITnet; CSAIL TIG
-printing pages are currently public.
+printing pages are currently public. When MIT KB is blocked, the bundled public
+MIT list remains available for general printer discovery.
 
 ## Print File Or URL
 

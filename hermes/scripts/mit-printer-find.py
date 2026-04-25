@@ -11,9 +11,51 @@ from html.parser import HTMLParser
 
 
 SOURCES = {
+    "bundled_public_mit": "bundled-public-mit-printers",
     "mit_pharos": "https://kb.mit.edu/confluence/display/mitcontrib/MIT+Printer+Locations",
     "csail_macos": "https://tig.csail.mit.edu/print-copy-scan/macos-printing/",
 }
+
+CURATED_PUBLIC_MIT_PRINTERS = [
+    ("Dorm Printers", "62: East Campus", "Amittai-Color.mit.edu", "amittai.mit.edu"),
+    ("Dorm Printers", "E2: 70 Amherst Street", "Senior-Color.mit.edu", "Senior-p.mit.edu"),
+    ("Dorm Printers", "E37: Graduate Tower at Site 4", "tower-color.mit.edu", ""),
+    ("Dorm Printers", "NW10: Edgerton House", "Edgerton-Color.mit.edu", "edgerton-p.mit.edu"),
+    ("Dorm Printers", "NW30: The Warehouse", "WH-Print-Color.mit.edu", "wh-print.mit.edu"),
+    ("Dorm Printers", "NW35: Ashdown House", "Ashdown-Color.mit.edu", "ashdown-p.mit.edu; avery-p.mit.edu"),
+    ("Dorm Printers", "NW61: Random Hall", "Jarthur-Color.mit.edu", "jarthur.mit.edu"),
+    ("Dorm Printers", "NW86: Sidney Pacific", "Albany-Color.mit.edu", "albany-p.mit.edu; massave-p.mit.edu"),
+    ("Dorm Printers", "W1: Maseeh Hall", "Maseeh-Color.mit.edu", "Maseeh-p.mit.edu; Electro-p.mit.edu; Tesla-p.mit.edu"),
+    ("Dorm Printers", "W4: McCormick Hall", "Katharine-Color.mit.edu", "katharine-p.mit.edu"),
+    ("Dorm Printers", "W7: Baker House", "Mortar-Color.mit.edu", "mortar-p.mit.edu; atwork02.mit.edu"),
+    ("Dorm Printers", "W46: New Vassar", "Vassar-Color.mit.edu", "barbar-p.mit.edu"),
+    ("Dorm Printers", "W51: Front desk", "", "burtonconner-p"),
+    ("Dorm Printers", "W61: MacGregor House", "W61Cluster-Color.mit.edu", "w61cluster.mit.edu"),
+    ("Dorm Printers", "W70: New House", "Corfu-Color.mit.edu", "clearcut-p.mit.edu; corfu-p.mit.edu"),
+    ("Dorm Printers", "W71: Next House", "Tree-Eater-Color.mit.edu", "tree-eater.mit.edu"),
+    ("Dorm Printers", "W79: Simmons Hall", "Simmons-Color.mit.edu", "simmons-p.mit.edu; waffle-p.mit.edu"),
+    ("Dorm Printers", "W84: Tang Hall", "W84prt-Color.mit.edu", "w84prt-p.mit.edu; wg-tang-p.mit.edu"),
+    ("Dorm Printers", "W85: Westgate", "Westgate-Color.mit.edu", "westgate-p.mit.edu"),
+    ("Library printers", "7-238 Rotch", "Rotch-color.mit.edu; Rotch-color2.mit.edu", ""),
+    ("Library printers", "10-500 Barker", "barker-color.mit.edu; barker-color2.mit.edu", ""),
+    ("Library printers", "14E Lewis Library", "lewis-color.mit.edu", ""),
+    ("Library printers", "14S-100 Hayden Library", "haydencolor-print.mit.edu; haydencolor2-print.mit.edu", "hayden-p.mit.edu"),
+    ("Library printers", "E53-100 Dewey", "dewey-color.mit.edu; dewey-color2.mit.edu", "virus-p.mit.edu"),
+    ("Sloan printers", "E51-210", "e51-210-xerox.mit.edu", ""),
+    ("Sloan printers", "E62-107 Sloan Business Center", "e62-bc-color.mit.edu", "e62-bc-bw.mit.edu"),
+    ("Sloan printers", "E62-231 (Outside hallway)", "", "e62-2west-bw.mit.edu"),
+    ("Sloan printers", "E62-274 (Outside hallway)", "", "e62-2east-bw.mit.edu"),
+    ("Other printer locations", "1-165: Civil", "", "Civil-p.mit.edu"),
+    ("Other printer locations", "4-167", "Athena-Color.mit.edu; Athena-Color2.mit.edu; Athena-Color3.mit.edu", ""),
+    ("Other printer locations", "11-004 Copytech", "Copytech-Color; Copytech-Color2", ""),
+    ("Other printer locations", "32-Stata Lobby", "stata-color.mit.edu", "stata-p.mit.edu"),
+    ("Other printer locations", "48-216-Parsons Lab", "", "celine.mit.edu"),
+    ("Other printer locations", "E25-519 hallway", "", "imes-p.mit.edu"),
+    ("Other printer locations", "E38-383 MIT Innovation", "ihqstudent-color.mit.edu", "ihqstudentbw-p"),
+    ("Other printer locations", "E51-268 Hallway \"Nook\" (hallway outside of E51-268)", "", "E51-268-NOOK-P"),
+    ("Other printer locations", "W20-540", "W20Color3.mit.edu; W20Color4.mit.edu", "ajax-p.mit.edu"),
+    ("Other printer locations", "W20-575", "W20Color.mit.edu; W20Color2.mit.edu", "metis-p.mit.edu"),
+]
 
 DEPARTMENT_HINTS = {
     "csailprivate",
@@ -137,6 +179,46 @@ def aliases_for(location, printer_type):
     return sorted(alias for alias in aliases if alias)
 
 
+def append_public_printer(printers, section, location, color_text, bw_text, source, notes):
+    color_hosts = split_hosts(color_text)
+    bw_hosts = split_hosts(bw_text)
+    if not location or not (color_hosts or bw_hosts):
+        return
+    caps = ["pharos", "print"]
+    if color_hosts:
+        caps.append("color")
+    if bw_hosts:
+        caps.append("black-and-white")
+    printers.append({
+        "name": f"MIT Pharos {location}",
+        "type": "pharos",
+        "building": building_from_location(location),
+        "room": location,
+        "area": section,
+        "aliases": aliases_for(location, "pharos"),
+        "hostnames": color_hosts + bw_hosts,
+        "color_hostnames": color_hosts,
+        "bw_hostnames": bw_hosts,
+        "capabilities": caps,
+        "source": source,
+        "fetched_at": now_iso(),
+        "notes": notes,
+    })
+
+
+def add_curated_public_mit(printers):
+    for section, location, color_text, bw_text in CURATED_PUBLIC_MIT_PRINTERS:
+        append_public_printer(
+            printers,
+            section,
+            location,
+            color_text,
+            bw_text,
+            SOURCES["bundled_public_mit"],
+            "Bundled public MIT printer list supplied in repo. Prefer live MIT KB data when available; use this list as an off-MITnet baseline.",
+        )
+
+
 def add_mit_pharos(printers, failures):
     try:
         tables = fetch_tables(SOURCES["mit_pharos"])
@@ -162,26 +244,15 @@ def add_mit_pharos(printers, failures):
             bw_hosts = split_hosts(bw_text)
             if not location or not (color_hosts or bw_hosts):
                 continue
-            caps = ["pharos", "print"]
-            if color_hosts:
-                caps.append("color")
-            if bw_hosts:
-                caps.append("black-and-white")
-            printers.append({
-                "name": f"MIT Pharos {location}",
-                "type": "pharos",
-                "building": building_from_location(location),
-                "room": location,
-                "area": section,
-                "aliases": aliases_for(location, "pharos"),
-                "hostnames": color_hosts + bw_hosts,
-                "color_hostnames": color_hosts,
-                "bw_hostnames": bw_hosts,
-                "capabilities": caps,
-                "source": SOURCES["mit_pharos"],
-                "fetched_at": now_iso(),
-                "notes": "Live MIT KB Pharos printer-location row. Submit via Athena Print Center/MobilePrint or configured Pharos client, then release at the device.",
-            })
+            append_public_printer(
+                printers,
+                section,
+                location,
+                color_text,
+                bw_text,
+                SOURCES["mit_pharos"],
+                "Live MIT KB Pharos printer-location row. Submit via Athena Print Center/MobilePrint or configured Pharos client, then release at the device.",
+            )
     if not matched:
         failures.append(f"{SOURCES['mit_pharos']}: no Pharos hostname table found in live response")
 
@@ -289,9 +360,20 @@ def wants_department_printers(query):
 def load_live_printers():
     printers = []
     failures = []
+    add_curated_public_mit(printers)
     add_mit_pharos(printers, failures)
     add_csail_printers(printers, failures)
-    return printers, failures
+    deduped = {}
+    for printer in printers:
+        host_key = tuple(sorted(norm(host) for host in printer.get("hostnames", [])))
+        key = (printer.get("type"), norm(printer.get("room", "")), host_key)
+        existing = deduped.get(key)
+        if not existing:
+            deduped[key] = printer
+            continue
+        if existing.get("source") == SOURCES["bundled_public_mit"] and printer.get("source") != SOURCES["bundled_public_mit"]:
+            deduped[key] = printer
+    return list(deduped.values()), failures
 
 
 def format_printer(printer, idx):
