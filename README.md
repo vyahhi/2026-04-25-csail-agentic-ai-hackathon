@@ -137,8 +137,9 @@ The MIT KB Pharos page may redirect to an access-restricted page from the
 off-campus Mac mini; when that happens, the helper reports the source failure
 and returns only sources it could fetch live. The Mac mini is not on the local
 MIT network, so direct printing with `lp` is attempted only if a local MIT print
-queue is configured; otherwise the helper points the user to Athena Print
-Center/MobilePrint at `https://print.mit.edu`.
+queue is configured. Remote Pharos printing uses Athena Print Center/MobilePrint
+at `https://print.mit.edu`; the helper can open that page on the Mac mini with
+`--open-mobileprint`.
 
 Configure read-only MIT email and Piazza helpers:
 

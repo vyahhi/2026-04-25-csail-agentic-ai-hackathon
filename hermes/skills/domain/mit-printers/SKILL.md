@@ -16,7 +16,8 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 - Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
 - For Pharos, the selected nearby printer is normally where the user releases the job; the submitted queue may be a central queue such as `mitprint`.
 - Do not claim a document was physically printed unless `lp` or another print command succeeded. Otherwise say it is ready to upload/release.
-- If the local machine is off MITnet or has no MIT print queue configured, direct the user to Athena Print Center/MobilePrint and provide the nearest printer candidates.
+- If the local machine is off MITnet or has no MIT print queue configured, use Athena Print Center/MobilePrint at `https://print.mit.edu` as the remote printing path and provide the nearest printer candidates.
+- The MIT KB Touchless Printing Release with MobilePrint page is the reference for remote release, but it may require MITnet or MIT VPN.
 - Use only documents or URLs the user supplied. Do not access private documents without explicit user intent.
 - For public Pharos printing near CSAIL/Stata/Building 32, prefer Stata Lobby Pharos printers first.
 - For CSAIL department printing, report the CSAIL queue name and required network: Building 32 printing requires CSAILPrivate wireless or wired CSAIL Ethernet.
@@ -49,18 +50,21 @@ Use:
 ```bash
 ~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --location "building 10"
 ~/.hermes/scripts/mit-print-file.sh --url "https://example.edu/file.pdf" --location "stata"
+~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --method mobileprint --open-mobileprint
 ```
 
 Optional flags:
 
 ```text
+--method auto|mobileprint|lp
+--open-mobileprint
 --queue QUEUE     default: MIT_PRINT_QUEUE or mitprint
 --copies N        default: 1
 --duplex
 --dry-run
 ```
 
-If `lp`, MITnet, or the queue is unavailable, the helper prints MobilePrint instructions.
+If `lp`, MITnet, or the queue is unavailable, the helper prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
 
 ## Telegram Attachments
 
@@ -69,7 +73,7 @@ When a user asks from Telegram to print an attached file:
 1. Locate the downloaded attachment path or URL in the current Telegram/Hermes message context.
 2. If only a Telegram URL is available, download it to a temporary file.
 3. Run `mit-print-file.sh --file ... --location ...` or `--url ...`.
-4. If no queue is configured, tell the user to upload the file at `https://print.mit.edu` and release it at one of the nearby printer candidates.
+4. Prefer `--method mobileprint --open-mobileprint` for remote Pharos printing. Tell the user the document path and nearby printer candidates.
 
 ## Sources
 

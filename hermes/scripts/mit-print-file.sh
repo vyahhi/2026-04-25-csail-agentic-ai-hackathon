@@ -4,18 +4,17 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  mit-print-file.sh --file PATH [--location QUERY] [--queue QUEUE] [--copies N] [--duplex] [--dry-run]
-  mit-print-file.sh --url URL  [--location QUERY] [--queue QUEUE] [--copies N] [--duplex] [--dry-run]
+  mit-print-file.sh --file PATH [--location QUERY] [--method auto|mobileprint|lp] [--open-mobileprint] [--queue QUEUE] [--copies N] [--duplex] [--dry-run]
+  mit-print-file.sh --url URL  [--location QUERY] [--method auto|mobileprint|lp] [--open-mobileprint] [--queue QUEUE] [--copies N] [--duplex] [--dry-run]
 
-Submits a document to a local print queue if one is configured. For MIT Pharos,
-the normal queue is often "mitprint"; release the job at a nearby Pharos device.
+Prepares remote MIT Pharos printing through Athena Print Center/MobilePrint, or
+submits to a local print queue if one is configured. For MIT Pharos, release the
+job at a nearby Pharos device or through MobilePrint.
 
-If no local queue is available, the script prints instructions for Athena Print
-Center/MobilePrint: https://print.mit.edu
+MobilePrint URL: https://print.mit.edu
 
-This Mac mini may be off MITnet. In that case, do not expect direct MIT print
-queues to work; use Athena Print Center/MobilePrint from an MIT-authenticated
-browser/session instead.
+The MIT KB Touchless Printing Release with MobilePrint page may be MITnet-only.
+If that page is not reachable from the Mac mini, use the Athena Print Center URL.
 USAGE
 }
 
@@ -26,12 +25,16 @@ queue="${MIT_PRINT_QUEUE:-mitprint}"
 copies=1
 duplex=false
 dry_run=false
+method="auto"
+open_mobileprint=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --file) file="$2"; shift 2 ;;
     --url) url="$2"; shift 2 ;;
     --location) location="$2"; shift 2 ;;
+    --method) method="$2"; shift 2 ;;
+    --open-mobileprint) open_mobileprint=true; shift ;;
     --queue) queue="$2"; shift 2 ;;
     --copies) copies="$2"; shift 2 ;;
     --duplex) duplex=true; shift ;;
@@ -51,6 +54,11 @@ if [[ -n "$file" && -n "$url" ]]; then
   echo "Use only one of --file or --url." >&2
   exit 2
 fi
+
+case "$method" in
+  auto|mobileprint|lp) ;;
+  *) echo "Unknown --method: $method" >&2; usage >&2; exit 2 ;;
+esac
 
 if [[ -n "$url" ]]; then
   tmpdir="$(mktemp -d)"
@@ -73,21 +81,43 @@ if [[ -n "$location" && -x "$HOME/.hermes/scripts/mit-printer-find.py" ]]; then
   "$HOME/.hermes/scripts/mit-printer-find.py" "$location" --limit 3 || true
 fi
 
-if ! command -v lp >/dev/null 2>&1; then
+print_mobileprint_instructions() {
   echo
-  echo "Local lp command not found. Upload manually to Athena Print Center:"
-  echo "  https://print.mit.edu"
+  echo "Remote MIT printing path: Athena Print Center/MobilePrint"
+  echo "  1. Open https://print.mit.edu in an MIT-authenticated browser."
+  echo "  2. Upload this document:"
+  echo "     $file"
+  echo "  3. Set copies/options in MobilePrint."
+  echo "  4. Release the job remotely in Athena Print Center or at the selected Pharos printer."
+  echo
+  echo "MIT KB reference, may require MITnet or MIT VPN:"
+  echo "  https://kb.mit.edu/confluence/display/istcontrib/Touchless+Printing+Release+with+MobilePrint"
+}
+
+if [[ "$open_mobileprint" == true ]]; then
+  if command -v open >/dev/null 2>&1; then
+    open "https://print.mit.edu" || true
+  else
+    echo "Cannot open browser automatically; command 'open' is unavailable." >&2
+  fi
+fi
+
+if [[ "$method" == "mobileprint" ]]; then
+  print_mobileprint_instructions
+  exit 0
+fi
+
+if ! command -v lp >/dev/null 2>&1; then
+  print_mobileprint_instructions
   exit 0
 fi
 
 if ! lpstat -v "$queue" >/dev/null 2>&1; then
-  echo
-  echo "Print queue '$queue' is not configured on this machine."
-  echo "Upload manually to Athena Print Center/MobilePrint:"
-  echo "  https://print.mit.edu"
-  echo
-  echo "MIT IS&T says Athena Print Center can upload documents and release jobs to Pharos printers."
-  echo "This is expected when running from a machine that is not on MITnet."
+  if [[ "$method" == "lp" ]]; then
+    echo "Print queue '$queue' is not configured on this machine." >&2
+    exit 1
+  fi
+  print_mobileprint_instructions
   exit 0
 fi
 
