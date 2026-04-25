@@ -173,6 +173,22 @@ Suggested verification questions:
 - "Is this a faithful coloring-book conversion of the original photo?"
 - "Is this clean black-and-white line art suitable for coloring?"
 
+## Speed Guidance
+
+For repeated workflows like "same, coloring page and print in stata":
+- do not run `vision_analyze` on the source image unless it is actually needed for prompt refinement, ambiguity resolution, or debugging
+- if the edit goal is already clear, go straight to the Codex image-edit script
+- use `vision_analyze` primarily for post-generation QA on the output image
+- if printing fails, fall back to CDP/browser recovery only after the normal print helper fails
+
+The usual fast path is:
+1. image edit via Codex
+2. output QA with `vision_analyze`
+3. print via the browser helper
+4. CDP recovery only if needed
+
+Important: if the user asks whether the result came from real image editing versus a descriptive redraw, answer explicitly. The generation should come from the source-image Codex/OpenAI edit flow; `vision_analyze` is only for inspection or QA.
+
 ## Optional config improvement
 
 If the user wants Hermes to prefer OpenAI/Codex for ordinary image generation too, set:

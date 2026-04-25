@@ -69,7 +69,33 @@ Optional flags:
 --dry-run
 ```
 
-If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. If the persistent browser session is not authenticated, it then prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
+If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. Run that helper from the Hermes repo venv rather than system Python, because the browser/CDP dependencies may only exist there:
+
+```bash
+source ~/.hermes/hermes-agent/venv/bin/activate && python ~/.hermes/scripts/mit-print-browser.py print --file /absolute/path/to/file.pdf --printer stata-p
+```
+
+If the persistent browser session is not authenticated, it then prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
+
+### CDP Fallback
+
+If the browser helper stalls after upload, use the live persistent browser session as a recovery path instead of giving up. Typical failure signals are:
+- `Could not reach the print confirmation dialog.`
+- `Uploaded file ... did not become ready in My Print Center.`
+
+Recovery flow:
+1. Find the active `print.mit.edu` tab in the persistent browser.
+2. Inspect live page state through DOM/CDP to confirm the uploaded filename, current destination, visible dialogs, and current quota.
+3. Clear blocking `OK` dialogs or stale confirmation modals.
+4. Select the uploaded job row explicitly if it is present but not selected.
+5. Click the page `Print` button.
+6. If the Pharos confirmation dialog appears, click `Confirm`.
+7. Verify success before claiming it:
+   - the uploaded file row disappears
+   - page shows `There is no data` / `No items to display`
+   - or quota decreases by the document cost
+
+Do not say the print succeeded unless the normal helper or the CDP fallback actually verified it.
 
 ## Telegram Attachments
 
