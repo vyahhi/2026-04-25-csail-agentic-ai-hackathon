@@ -116,6 +116,36 @@ for line in (Path.home() / ".hermes" / ".env").read_text().splitlines():
         key = line.split("=", 1)[0]
         print(f"{key}=***REDACTED***" if key == "TELEGRAM_BOT_TOKEN" else line)
 PY
+
+python3 - <<'PY'
+from pathlib import Path
+
+path = Path.home() / ".hermes" / "config.yaml"
+text = path.read_text() if path.exists() else ""
+
+if "display:" not in text:
+    text += "\n# Messaging interaction defaults\ndisplay:\n  busy_input_mode: queue\n"
+elif "busy_input_mode:" not in text:
+    lines = text.splitlines()
+    out = []
+    inserted = False
+    for line in lines:
+        out.append(line)
+        if line.strip() == "display:":
+            out.append("  busy_input_mode: queue")
+            inserted = True
+    text = "\n".join(out) + ("\n" if out else "")
+else:
+    import re
+    text = re.sub(r'(^\s*busy_input_mode:\s*).*$',
+                  r'\1queue',
+                  text,
+                  flags=re.M)
+
+path.write_text(text)
+PY
+
+echo "Configured display.busy_input_mode=queue in ~/.hermes/config.yaml"
 hermes gateway status || true
 REMOTE_SCRIPT
 
@@ -129,3 +159,4 @@ if [[ -z "$TELEGRAM_ALLOWED_USERS" || -z "$TELEGRAM_HOME_CHANNEL" ]]; then
 else
   echo "Telegram token, allowlist, and home channel are configured."
 fi
+echo "Default busy-message mode is queue. Use /stop in Telegram to interrupt the current task."

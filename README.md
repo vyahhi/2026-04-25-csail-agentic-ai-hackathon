@@ -109,6 +109,11 @@ TELEGRAM_HOME_CHANNEL=152157536
 user or chat IDs, not `@username` handles. Message @userinfobot to find your
 numeric user ID, or send `/start` to the bot and inspect Bot API updates.
 
+Telegram busy-session behavior:
+
+- default: new messages are queued while Hermes is busy
+- interrupt command: `/stop`
+
 Configure MIT Canvas access:
 
 ```bash
