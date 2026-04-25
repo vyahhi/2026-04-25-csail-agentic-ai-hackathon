@@ -23,7 +23,6 @@ FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-printers/SKILL.md:.hermes/skills/domain/mit-printers/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-printer-find.py:.hermes/scripts/mit-printer-find.py"
   "$REPO_ROOT/hermes/scripts/mit-print-file.sh:.hermes/scripts/mit-print-file.sh"
-  "$REPO_ROOT/hermes/data/mit-printers.json:.hermes/data/mit-printers.json"
 )
 
 if ! command -v expect >/dev/null 2>&1; then
@@ -111,7 +110,7 @@ EXPECT_EOF
 }
 
 echo "Configuring Hermes MIT printers skill on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/skills/domain/mit-printers ~/.hermes/scripts ~/.hermes/data"
+run_remote "mkdir -p ~/.hermes/skills/domain/mit-printers ~/.hermes/scripts && rm -f ~/.hermes/data/mit-printers.json"
 
 for mapping in "${FILES[@]}"; do
   local_path="${mapping%%:*}"

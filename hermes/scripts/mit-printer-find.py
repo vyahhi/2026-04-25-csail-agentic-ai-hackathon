@@ -1,78 +1,329 @@
 #!/usr/bin/env python3
 import argparse
+import datetime as dt
+import html
 import json
 import re
+import sys
+import urllib.request
 from difflib import SequenceMatcher
-from pathlib import Path
+from html.parser import HTMLParser
+
+
+SOURCES = {
+    "mit_pharos": "https://kb.mit.edu/confluence/display/mitcontrib/MIT+Printer+Locations",
+    "csail_macos": "https://tig.csail.mit.edu/print-copy-scan/macos-printing/",
+}
+
+
+class TableParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.tables = []
+        self.heading = ""
+        self._heading_tag = None
+        self._heading_text = []
+        self._table_stack = []
+        self._row = None
+        self._cell = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"h1", "h2", "h3", "h4"}:
+            self._heading_tag = tag
+            self._heading_text = []
+        elif tag == "table":
+            self._table_stack.append({"heading": self.heading, "rows": []})
+        elif tag == "tr" and self._table_stack:
+            self._row = []
+        elif tag in {"td", "th"} and self._row is not None:
+            self._cell = []
+        elif tag == "br" and self._cell is not None:
+            self._cell.append(" ")
+
+    def handle_endtag(self, tag):
+        if tag == self._heading_tag:
+            text = clean(" ".join(self._heading_text))
+            if text:
+                self.heading = text
+            self._heading_tag = None
+            self._heading_text = []
+        elif tag in {"td", "th"} and self._cell is not None and self._row is not None:
+            self._row.append(clean(" ".join(self._cell)))
+            self._cell = None
+        elif tag == "tr" and self._row is not None and self._table_stack:
+            if any(self._row):
+                self._table_stack[-1]["rows"].append(self._row)
+            self._row = None
+        elif tag == "table" and self._table_stack:
+            table = self._table_stack.pop()
+            if table["rows"]:
+                self.tables.append(table)
+
+    def handle_data(self, data):
+        if self._cell is not None:
+            self._cell.append(data)
+        if self._heading_tag is not None:
+            self._heading_text.append(data)
+
+
+def clean(value):
+    value = html.unescape(str(value)).replace("\xa0", " ")
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def norm(value):
     return re.sub(r"[^a-z0-9]+", " ", str(value).lower()).strip()
 
 
+def fetch_tables(url):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Hermes MIT printer lookup/1.0",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    })
+    with urllib.request.urlopen(req, timeout=25) as resp:
+        final_url = resp.geturl()
+        if "accessrestricted" in final_url:
+            raise RuntimeError(f"source redirected to access-restricted page: {final_url}")
+        body = resp.read().decode(resp.headers.get_content_charset() or "utf-8", "ignore")
+    parser = TableParser()
+    parser.feed(body)
+    return parser.tables
+
+
+def split_hosts(value):
+    value = clean(value)
+    if not value or value == "&nbsp;":
+        return []
+    hosts = []
+    for piece in re.split(r"[;,]", value):
+        host = clean(piece)
+        if host and host.lower() not in {"none", "n/a"}:
+            hosts.append(host)
+    return hosts
+
+
+def building_from_location(location):
+    match = re.match(r"([A-Z]*\d+[A-Z]*|W\d+|NW\d+|NE\d+|E\d+|N\d+)(?:[-:\s]|$)", location.strip(), re.I)
+    return match.group(1).upper() if match else ""
+
+
+def aliases_for(location, printer_type):
+    aliases = {location, building_from_location(location)}
+    lowered = location.lower()
+    for key in ["stata", "csail", "barker", "dewey", "hayden", "rotch", "lewis", "sloan", "student center", "copytech"]:
+        if key in lowered:
+            aliases.add(key)
+    if "stata" in lowered or "32-" in lowered or location.startswith("32"):
+        aliases.update({"building 32", "stata center", "csail", "gates", "dreyfoos"})
+    if "w20" in lowered:
+        aliases.update({"student center", "stratton"})
+    if printer_type == "csail-department":
+        aliases.update({"csail", "stata", "building 32"})
+    return sorted(alias for alias in aliases if alias)
+
+
+def add_mit_pharos(printers, failures):
+    try:
+        tables = fetch_tables(SOURCES["mit_pharos"])
+    except Exception as exc:
+        failures.append(f"{SOURCES['mit_pharos']}: {exc}")
+        return
+
+    matched = False
+    for table in tables:
+        rows = table["rows"]
+        if not rows:
+            continue
+        headers = [norm(cell) for cell in rows[0]]
+        if len(headers) < 3 or "location" not in headers[0] or "hostname color" not in headers[1]:
+            continue
+        matched = True
+        section = table["heading"] or "MIT Pharos"
+        for row in rows[1:]:
+            if len(row) < 3:
+                continue
+            location, color_text, bw_text = row[0], row[1], row[2]
+            color_hosts = split_hosts(color_text)
+            bw_hosts = split_hosts(bw_text)
+            if not location or not (color_hosts or bw_hosts):
+                continue
+            caps = ["pharos", "print"]
+            if color_hosts:
+                caps.append("color")
+            if bw_hosts:
+                caps.append("black-and-white")
+            printers.append({
+                "name": f"MIT Pharos {location}",
+                "type": "pharos",
+                "building": building_from_location(location),
+                "room": location,
+                "area": section,
+                "aliases": aliases_for(location, "pharos"),
+                "hostnames": color_hosts + bw_hosts,
+                "color_hostnames": color_hosts,
+                "bw_hostnames": bw_hosts,
+                "capabilities": caps,
+                "source": SOURCES["mit_pharos"],
+                "fetched_at": now_iso(),
+                "notes": "Live MIT KB Pharos printer-location row. Submit via Athena Print Center/MobilePrint or configured Pharos client, then release at the device.",
+            })
+    if not matched:
+        failures.append(f"{SOURCES['mit_pharos']}: no Pharos hostname table found in live response")
+
+
+def add_csail_printers(printers, failures):
+    try:
+        tables = fetch_tables(SOURCES["csail_macos"])
+    except Exception as exc:
+        failures.append(f"{SOURCES['csail_macos']}: {exc}")
+        return
+
+    for table in tables:
+        rows = table["rows"]
+        if not rows:
+            continue
+        headers = [norm(cell) for cell in rows[0]]
+        if headers[:3] != ["location", "printer queue name", "model"]:
+            continue
+        for row in rows[1:]:
+            if len(row) < 3:
+                continue
+            location, queue_raw, model = [clean(cell) for cell in row[:3]]
+            queue = re.sub(r"\s*\(.*?\)\s*", "", queue_raw).strip()
+            if not location or not queue:
+                continue
+            building = "45" if location.startswith("45-") else "32"
+            caps = ["print"]
+            model_norm = norm(model)
+            if any(token in model_norm for token in ["primelink", "6510", "c310"]):
+                caps.append("color")
+            if "primelink" in model_norm:
+                caps.extend(["black-and-white", "copy", "scan"])
+            elif "black-and-white" not in caps:
+                caps.append("black-and-white")
+            printers.append({
+                "name": f"CSAIL {queue}",
+                "type": "csail-department",
+                "building": building,
+                "room": f"{building}-{location}" if not location.startswith(building) else location,
+                "area": "CSAIL / Stata Center" if building == "32" else "CSAIL Building 45",
+                "queue": queue,
+                "queue_label": queue_raw,
+                "model": model,
+                "aliases": aliases_for(f"{building}-{location} {queue} {queue_raw}", "csail-department"),
+                "hostnames": [f"{queue}.csail.mit.edu"],
+                "capabilities": sorted(set(caps)),
+                "network_required": "CSAILPrivate wireless or wired CSAIL Ethernet in Building 32" if building == "32" else "MIT Secure or wired Ethernet configured on CSAIL subnet in Building 45",
+                "source": SOURCES["csail_macos"],
+                "fetched_at": now_iso(),
+                "notes": "Live CSAIL TIG printer row. The remote Mac mini is off CSAIL/MIT local network, so this is normally lookup/setup guidance rather than direct printing.",
+            })
+        break
+
+
+def now_iso():
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+
+
 def score(printer, query):
     q = norm(query)
     if not q:
         return 0.0
-    haystack = " ".join(
-        norm(printer.get(key, ""))
-        for key in ("name", "building", "room", "area", "notes", "type")
-    )
-    capabilities = " ".join(printer.get("capabilities", []))
-    aliases = " ".join(printer.get("aliases", []))
-    hostnames = " ".join(printer.get("hostnames", []))
-    haystack = f"{haystack} {norm(capabilities)} {norm(aliases)} {norm(hostnames)}"
+    fields = ("name", "building", "room", "area", "notes", "type", "queue", "model")
+    haystack = " ".join(norm(printer.get(key, "")) for key in fields)
+    haystack = " ".join([
+        haystack,
+        norm(" ".join(printer.get("capabilities", []))),
+        norm(" ".join(printer.get("aliases", []))),
+        norm(" ".join(printer.get("hostnames", []))),
+    ])
 
     parts = q.split()
     exact_hits = sum(1 for part in parts if part in haystack)
     ratio = SequenceMatcher(None, q, haystack).ratio()
-
     building = norm(printer.get("building", ""))
     room = norm(printer.get("room", ""))
     building_boost = 0.0
     for part in parts:
         if part == building:
-            building_boost += 1.0
+            building_boost += 1.5
         if room.startswith(part) or part in room:
-            building_boost += 0.5
+            building_boost += 0.75
 
     total = exact_hits * 2.0 + building_boost + ratio
     if printer.get("type") == "pharos":
+        total += 1.0
+    if "csail" in parts and printer.get("type") == "csail-department":
+        total += 2.5
+    if "stata" in parts and printer.get("building") == "32":
         total += 1.5
-    if "support" in printer.get("capabilities", []):
-        total -= 2.0
     return total
 
 
+def load_live_printers():
+    printers = []
+    failures = []
+    add_mit_pharos(printers, failures)
+    add_csail_printers(printers, failures)
+    return printers, failures
+
+
+def format_printer(printer, idx):
+    caps = ", ".join(printer.get("capabilities", [])) or "unknown"
+    print(f"{idx}. {printer['name']}")
+    print(f"   Location: {printer.get('room', 'unknown')} ({printer.get('area', 'MIT')})")
+    print(f"   Type: {printer.get('type', 'unknown')} | Capabilities: {caps}")
+    if printer.get("queue"):
+        print(f"   Queue ID: {printer['queue']}")
+    if printer.get("model"):
+        print(f"   Model: {printer['model']}")
+    if printer.get("color_hostnames"):
+        print(f"   Color hostnames: {', '.join(printer['color_hostnames'])}")
+    if printer.get("bw_hostnames"):
+        print(f"   B/W hostnames: {', '.join(printer['bw_hostnames'])}")
+    elif printer.get("hostnames"):
+        print(f"   Hostnames: {', '.join(printer['hostnames'])}")
+    if printer.get("network_required"):
+        print(f"   Network required: {printer['network_required']}")
+    print(f"   Source: {printer.get('source')}")
+    print(f"   Fetched: {printer.get('fetched_at')}")
+    print(f"   Notes: {printer.get('notes', '')}")
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Find MIT printers near a fuzzy location.")
+    parser = argparse.ArgumentParser(description="Find MIT printers near a fuzzy location from live MIT/CSAIL sources.")
     parser.add_argument("query", nargs="*", help="Location query, e.g. 'stata', '32', 'barker', 'near 10'.")
-    parser.add_argument("--data", default=str(Path.home() / ".hermes" / "data" / "mit-printers.json"))
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of text.")
+    parser.add_argument("--sources", action="store_true", help="Print the live source URLs and exit.")
     args = parser.parse_args()
 
-    data = json.loads(Path(args.data).read_text())
+    if args.sources:
+        print(json.dumps(SOURCES, indent=2))
+        return
+
+    printers, failures = load_live_printers()
+    if not printers:
+        print("No printer data could be fetched from live sources.", file=sys.stderr)
+        for failure in failures:
+            print(f"Fetch failed: {failure}", file=sys.stderr)
+        sys.exit(1)
+
     query = " ".join(args.query)
-    ranked = sorted(data, key=lambda item: score(item, query), reverse=True)
+    ranked = sorted(printers, key=lambda item: score(item, query), reverse=True)
     ranked = ranked[: args.limit]
 
     if args.json:
-        print(json.dumps(ranked, indent=2))
+        print(json.dumps({"results": ranked, "fetch_failures": failures, "sources": SOURCES}, indent=2))
         return
 
     for idx, printer in enumerate(ranked, 1):
-        caps = ", ".join(printer.get("capabilities", [])) or "unknown"
-        print(f"{idx}. {printer['name']}")
-        print(f"   Location: {printer.get('room', 'unknown')} ({printer.get('area', 'MIT')})")
-        print(f"   Type: {printer.get('type', 'unknown')} | Capabilities: {caps}")
-        if printer.get("queue"):
-            print(f"   Queue: {printer['queue']}")
-        if printer.get("hostnames"):
-            print(f"   Hostnames: {', '.join(printer['hostnames'])}")
-        if printer.get("network_required"):
-            print(f"   Network required: {printer['network_required']}")
-        print(f"   Notes: {printer.get('notes', '')}")
+        format_printer(printer, idx)
+    if failures:
+        print()
+        for failure in failures:
+            print(f"Warning: fetch failed: {failure}", file=sys.stderr)
 
 
 if __name__ == "__main__":

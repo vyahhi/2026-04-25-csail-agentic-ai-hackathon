@@ -127,16 +127,18 @@ This installs:
 
 ```text
 hermes/skills/domain/mit-printers/SKILL.md
-hermes/data/mit-printers.json
 hermes/scripts/mit-printer-find.py
 hermes/scripts/mit-print-file.sh
 ```
 
-The Mac mini is not on the local MIT network. The printer skill therefore
-focuses on finding nearby Pharos printers and preparing upload/release guidance.
-Direct printing with `lp` is attempted only if a local MIT print queue is
-configured; otherwise it points the user to Athena Print Center/MobilePrint at
-`https://print.mit.edu`.
+The printer lookup helper fetches MIT KB Pharos printer locations and CSAIL TIG
+printer docs live on every query. No local printer dataset is installed or used.
+The MIT KB Pharos page may redirect to an access-restricted page from the
+off-campus Mac mini; when that happens, the helper reports the source failure
+and returns only sources it could fetch live. The Mac mini is not on the local
+MIT network, so direct printing with `lp` is attempted only if a local MIT print
+queue is configured; otherwise the helper points the user to Athena Print
+Center/MobilePrint at `https://print.mit.edu`.
 
 Configure read-only MIT email and Piazza helpers:
 

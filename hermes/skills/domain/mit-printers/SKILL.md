@@ -10,7 +10,8 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 ## Operating Rules
 
 - The configured Mac mini is not on the local MIT network. Do not assume it can reach MIT-only printers, MITnet-only KB pages, or department print queues directly.
-- The local printer list is a cached dataset, not automatically live. If the user needs current availability, verify against MIT Printer Locations, CSAIL TIG printing docs, or live CUPS/status pages from an MIT/CSAIL network.
+- Always use live source lookup through `mit-printer-find.py`. Do not use or create a local cached printer dataset.
+- If a live source redirects to an access-restricted page from the off-campus Mac mini, report that source failure and use only the sources that were actually fetched.
 - Treat printing as a user-visible side effect. Confirm the document and destination before submitting to a local print queue unless the user has already explicitly said to print that exact file.
 - Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
 - For Pharos, the selected nearby printer is normally where the user releases the job; the submitted queue may be a central queue such as `mitprint`.
@@ -28,13 +29,18 @@ Use the fuzzy finder:
 ~/.hermes/scripts/mit-printer-find.py "stata"
 ~/.hermes/scripts/mit-printer-find.py "building 10"
 ~/.hermes/scripts/mit-printer-find.py "near E51"
+~/.hermes/scripts/mit-printer-find.py "csail" --json
 ```
 
-The data file is:
+The helper fetches remote sources on every run:
 
 ```text
-~/.hermes/data/mit-printers.json
+https://kb.mit.edu/confluence/display/mitcontrib/MIT+Printer+Locations
+https://tig.csail.mit.edu/print-copy-scan/macos-printing/
 ```
+
+The MIT KB Pharos page may be access-restricted from outside MITnet; CSAIL TIG
+printing pages are currently public.
 
 ## Print File Or URL
 
@@ -65,10 +71,9 @@ When a user asks from Telegram to print an attached file:
 3. Run `mit-print-file.sh --file ... --location ...` or `--url ...`.
 4. If no queue is configured, tell the user to upload the file at `https://print.mit.edu` and release it at one of the nearby printer candidates.
 
-## Sources Encoded In The Local Dataset
+## Sources
 
 - MIT IS&T Printers and Printing service page.
+- MIT KB Pharos printer locations.
 - MIT Libraries printer location guide.
-- MIT computing map public student printer list.
-- MIT Tang Hall computing page.
-- MIT Math Department printing page for department printers.
+- CSAIL TIG printing docs.
