@@ -141,6 +141,17 @@ queue is configured. Remote Pharos printing uses Athena Print Center/MobilePrint
 at `https://print.mit.edu`; the helper can open that page on the Mac mini with
 `--open-mobileprint`.
 
+Configure MIT VPN / GlobalProtect:
+
+```bash
+scripts/configure-mit-vpn-globalprotect.sh
+```
+
+MIT's VPN uses Prisma Access GlobalProtect with portal `gpvpn.mit.edu`. The
+script checks whether GlobalProtect is installed on the Mac mini and opens the
+portal on the Mac mini desktop. Installation and connection require interactive
+MIT Kerberos and Duo approval, so they cannot be completed purely over SSH.
+
 Configure read-only MIT email and Piazza helpers:
 
 ```bash
