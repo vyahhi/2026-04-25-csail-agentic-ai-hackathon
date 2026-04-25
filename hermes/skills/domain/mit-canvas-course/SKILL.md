@@ -1,6 +1,6 @@
 ---
 name: mit-canvas-course
-description: View-only access guidance for the configured MIT Canvas course. Use when the user asks about Canvas, MIT Canvas, course 37338, assignments, modules, syllabus, announcements, or course pages.
+description: View-only access guidance for the configured Canvas course. Use when the user asks about Canvas, assignments, modules, syllabus, announcements, or course pages.
 ---
 
 # MIT Canvas Course
@@ -12,12 +12,6 @@ This Hermes install is configured for a view-only Canvas target:
 - `CANVAS_COURSE_URL`
 - optional `CANVAS_API_TOKEN`
 
-Default course:
-
-```text
-https://canvas.mit.edu/courses/37338
-```
-
 ## Rules
 
 - Treat Canvas as read-only.
@@ -26,6 +20,7 @@ https://canvas.mit.edu/courses/37338
 - If `CANVAS_API_TOKEN` is absent or an API endpoint returns `401`, explain that authenticated Canvas API access requires a token and fall back to public page reads.
 - Prefer the Canvas REST API when `CANVAS_API_TOKEN` exists.
 - For public page reads, use `curl -Ls "$CANVAS_COURSE_URL"` and extract visible text or Canvas `ENV` metadata.
+- Do not rely on hard-coded course titles, assignment names, or announcements; query Canvas when answering.
 
 ## Useful Read-Only API Calls
 
