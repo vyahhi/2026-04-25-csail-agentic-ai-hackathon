@@ -24,7 +24,7 @@ Tailscale DNS: nicolaws-mac-mini.tail3b0ac2.ts.net
 SSH user: nicolaw
 Hermes: v0.11.0
 Model provider: openai-codex
-Default model: gpt-5.5
+Default model: gpt-5.4
 ```
 
 ### First-Time Setup
@@ -60,7 +60,7 @@ scripts/configure-hermes-openai-codex.sh
 
 This installs the Codex CLI cask if needed, copies local `~/.codex/auth.json` to
 the Mac mini, imports OpenAI Codex OAuth into Hermes, and updates
-`~/.hermes/config.yaml` to use `openai-codex` with `gpt-5.5`.
+`~/.hermes/config.yaml` to use `openai-codex` with `gpt-5.4`.
 
 If Hermes asks for device login, open the shown OpenAI URL locally and enter the
 displayed code.
@@ -216,7 +216,7 @@ Expected important checks:
 OpenAI Codex auth: logged in
 codex CLI: installed
 ripgrep (rg): installed
-Default model in ~/.hermes/config.yaml: gpt-5.5
+Default model in ~/.hermes/config.yaml: gpt-5.4
 Provider in ~/.hermes/config.yaml: openai-codex
 ```
 
