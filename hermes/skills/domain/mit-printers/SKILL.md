@@ -10,13 +10,15 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 ## Operating Rules
 
 - The configured Mac mini is not on the local MIT network. Do not assume it can reach MIT-only printers, MITnet-only KB pages, or department print queues directly.
+- The local printer list is a cached dataset, not automatically live. If the user needs current availability, verify against MIT Printer Locations, CSAIL TIG printing docs, or live CUPS/status pages from an MIT/CSAIL network.
 - Treat printing as a user-visible side effect. Confirm the document and destination before submitting to a local print queue unless the user has already explicitly said to print that exact file.
 - Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
 - For Pharos, the selected nearby printer is normally where the user releases the job; the submitted queue may be a central queue such as `mitprint`.
 - Do not claim a document was physically printed unless `lp` or another print command succeeded. Otherwise say it is ready to upload/release.
 - If the local machine is off MITnet or has no MIT print queue configured, direct the user to Athena Print Center/MobilePrint and provide the nearest printer candidates.
 - Use only documents or URLs the user supplied. Do not access private documents without explicit user intent.
-- For CSAIL, Stata, or Building 32, prefer the Stata Lobby Pharos printers first.
+- For public Pharos printing near CSAIL/Stata/Building 32, prefer Stata Lobby Pharos printers first.
+- For CSAIL department printing, report the CSAIL queue name and required network: Building 32 printing requires CSAILPrivate wireless or wired CSAIL Ethernet.
 
 ## Find Nearby Printers
 

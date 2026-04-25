@@ -70,6 +70,8 @@ def main():
             print(f"   Queue: {printer['queue']}")
         if printer.get("hostnames"):
             print(f"   Hostnames: {', '.join(printer['hostnames'])}")
+        if printer.get("network_required"):
+            print(f"   Network required: {printer['network_required']}")
         print(f"   Notes: {printer.get('notes', '')}")
 
 
