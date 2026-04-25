@@ -19,8 +19,6 @@ SSH_USER="${MAC_MINI_SSH_USER:?MAC_MINI_SSH_USER is required}"
 SSH_HOST="${MAC_MINI_TAILSCALE_DNS:-${MAC_MINI_TAILSCALE_HOST:?MAC_MINI_TAILSCALE_HOST is required}}"
 SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
 CANVAS_BASE_URL="${CANVAS_BASE_URL:-https://canvas.mit.edu}"
-CANVAS_COURSE_ID="${CANVAS_COURSE_ID:-37338}"
-CANVAS_COURSE_URL="${CANVAS_COURSE_URL:-$CANVAS_BASE_URL/courses/$CANVAS_COURSE_ID}"
 CANVAS_API_TOKEN="${CANVAS_API_TOKEN:-}"
 CANVAS_SKILL_FILE="$REPO_ROOT/hermes/skills/domain/mit-canvas-course/SKILL.md"
 CANVAS_SNAPSHOT_FILE="$REPO_ROOT/hermes/scripts/canvas-course-snapshot.sh"
@@ -127,8 +125,6 @@ from pathlib import Path
 path = Path.home() / ".hermes" / ".env"
 values = {
     "CANVAS_BASE_URL": os.environ["REMOTE_CANVAS_BASE_URL"],
-    "CANVAS_COURSE_ID": os.environ["REMOTE_CANVAS_COURSE_ID"],
-    "CANVAS_COURSE_URL": os.environ["REMOTE_CANVAS_COURSE_URL"],
 }
 token = os.environ.get("REMOTE_CANVAS_API_TOKEN", "").strip()
 if token:
@@ -140,6 +136,8 @@ seen = set()
 for line in lines:
     if "=" in line and not line.lstrip().startswith("#"):
         key = line.split("=", 1)[0]
+        if key in {"CANVAS_COURSE_ID", "CANVAS_COURSE_URL"}:
+            continue
         if key in values:
             out.append(f"{key}={values[key]}")
             seen.add(key)
@@ -159,20 +157,20 @@ echo "Configured Canvas values:"
 python3 - <<'PY'
 from pathlib import Path
 for line in (Path.home() / ".hermes" / ".env").read_text().splitlines():
-    if line.startswith(("CANVAS_BASE_URL=", "CANVAS_COURSE_ID=", "CANVAS_COURSE_URL=", "CANVAS_API_TOKEN=")):
+    if line.startswith(("CANVAS_BASE_URL=", "CANVAS_API_TOKEN=")):
         key = line.split("=", 1)[0]
         print(f"{key}=***REDACTED***" if key == "CANVAS_API_TOKEN" else line)
 PY
 REMOTE_SCRIPT
 
 encoded_script="$(base64 <"$tmp_script" | tr -d '\n')"
-remote_cmd="REMOTE_CANVAS_BASE_URL='${CANVAS_BASE_URL}' REMOTE_CANVAS_COURSE_ID='${CANVAS_COURSE_ID}' REMOTE_CANVAS_COURSE_URL='${CANVAS_COURSE_URL}' REMOTE_CANVAS_API_TOKEN='${CANVAS_API_TOKEN}' bash -lc 'printf %s ${encoded_script} | base64 -d | bash'"
+remote_cmd="REMOTE_CANVAS_BASE_URL='${CANVAS_BASE_URL}' REMOTE_CANVAS_API_TOKEN='${CANVAS_API_TOKEN}' bash -lc 'printf %s ${encoded_script} | base64 -d | bash'"
 
-echo "Configuring Hermes Canvas course on $SSH_USER@$SSH_HOST"
+echo "Configuring Hermes Canvas integration on $SSH_USER@$SSH_HOST"
 run_remote "$remote_cmd"
 copy_remote "$CANVAS_SKILL_FILE" ".hermes/skills/domain/mit-canvas-course/SKILL.md"
 copy_remote "$CANVAS_SNAPSHOT_FILE" ".hermes/scripts/canvas-course-snapshot.sh"
 copy_remote "$HERMES_MEMORY_FILE" ".hermes/memories/MEMORY.md"
 copy_remote "$HERMES_USER_FILE" ".hermes/memories/USER.md"
 run_remote "chmod +x ~/.hermes/scripts/canvas-course-snapshot.sh && ~/.hermes/scripts/canvas-course-snapshot.sh"
-echo "Hermes Canvas course configuration completed."
+echo "Hermes Canvas integration configuration completed."

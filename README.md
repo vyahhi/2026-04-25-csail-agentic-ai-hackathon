@@ -83,7 +83,7 @@ TELEGRAM_HOME_CHANNEL=152157536
 user or chat IDs, not `@username` handles. Message @userinfobot to find your
 numeric user ID, or send `/start` to the bot and inspect Bot API updates.
 
-Configure the MIT Canvas course target:
+Configure MIT Canvas access:
 
 ```bash
 scripts/configure-hermes-canvas.sh
@@ -93,8 +93,6 @@ Default `.env` values:
 
 ```text
 CANVAS_BASE_URL=https://canvas.mit.edu
-CANVAS_COURSE_ID=37338
-CANVAS_COURSE_URL=https://canvas.mit.edu/courses/37338
 CANVAS_API_TOKEN=
 ```
 
@@ -113,9 +111,10 @@ hermes/memories/MEMORY.md
 hermes/memories/USER.md
 ```
 
-Without `CANVAS_API_TOKEN`, Canvas API endpoints return `401`, so Hermes uses
-public page reads only. Keep this integration view-only: use `GET` requests
-only and do not submit or modify course content.
+With `CANVAS_API_TOKEN`, Hermes can discover the user's current courses
+dynamically and then inspect whichever course is relevant. Keep this
+integration view-only: use `GET` requests only and do not submit or modify
+course content.
 
 Configure MIT printer lookup and print-prep helpers:
 
