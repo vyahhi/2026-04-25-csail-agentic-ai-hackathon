@@ -20,6 +20,9 @@ SSH_HOST="${MAC_MINI_TAILSCALE_DNS:-${MAC_MINI_TAILSCALE_HOST:?MAC_MINI_TAILSCAL
 SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
 
 FILES=(
+  "$REPO_ROOT/hermes/skills/email/himalaya/SKILL.md:.hermes/skills/email/himalaya/SKILL.md"
+  "$REPO_ROOT/hermes/skills/email/himalaya/references/configuration.md:.hermes/skills/email/himalaya/references/configuration.md"
+  "$REPO_ROOT/hermes/skills/email/himalaya/references/message-composition.md:.hermes/skills/email/himalaya/references/message-composition.md"
   "$REPO_ROOT/hermes/skills/domain/mit-email-readonly/SKILL.md:.hermes/skills/domain/mit-email-readonly/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza/SKILL.md:.hermes/skills/domain/piazza/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza-readonly/SKILL.md:.hermes/skills/domain/piazza-readonly/SKILL.md"
@@ -120,7 +123,7 @@ EXPECT_EOF
 }
 
 echo "Configuring read-only Hermes integrations on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/skills/domain/mit-email-readonly ~/.hermes/skills/domain/piazza ~/.hermes/skills/domain/piazza-readonly ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
+run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email-readonly ~/.hermes/skills/domain/piazza ~/.hermes/skills/domain/piazza-readonly ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
 
 for mapping in "${FILES[@]}"; do
   local_path="${mapping%%:*}"

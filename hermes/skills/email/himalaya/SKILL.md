@@ -1,0 +1,186 @@
+---
+name: himalaya
+description: Generic IMAP/SMTP email CLI for non-MIT accounts or explicitly requested terminal email workflows. Do not use this as the default path for the user's MIT mailbox when the specialized mit-email-readonly workflow applies.
+version: 1.0.0
+author: community
+license: MIT
+metadata:
+  hermes:
+    tags: [Email, IMAP, SMTP, CLI, Communication]
+    homepage: https://github.com/pimalaya/himalaya
+prerequisites:
+  commands: [himalaya]
+---
+
+# Himalaya Email CLI
+
+Himalaya is a CLI email client that lets you manage emails from the terminal using IMAP, SMTP, Notmuch, or Sendmail backends.
+
+## Important routing note
+
+- This skill is generic and should be used for non-MIT accounts or when the user explicitly asks for Himalaya / IMAP / SMTP terminal workflows.
+- For this user's MIT mailbox, do not use Himalaya as the default path.
+- Prefer the specialized `mit-email-readonly` workflow instead: Apple Mail first, then Outlook browser fallback.
+
+## References
+
+- `references/configuration.md` (config file setup + IMAP/SMTP authentication)
+- `references/message-composition.md` (MML syntax for composing emails)
+
+## Prerequisites
+
+1. Himalaya CLI installed (`himalaya --version` to verify)
+2. A configuration file at `~/.config/himalaya/config.toml`
+3. IMAP/SMTP credentials configured (password stored securely)
+
+### Installation
+
+```bash
+# Pre-built binary (Linux/macOS — recommended)
+curl -sSL https://raw.githubusercontent.com/pimalaya/himalaya/master/install.sh | PREFIX=~/.local sh
+
+# macOS via Homebrew
+brew install himalaya
+
+# Or via cargo (any platform with Rust)
+cargo install himalaya --locked
+```
+
+## Configuration Setup
+
+Run the interactive wizard to set up an account:
+
+```bash
+himalaya account configure
+```
+
+Or create `~/.config/himalaya/config.toml` manually:
+
+```toml
+[accounts.personal]
+email = "you@example.com"
+display-name = "Your Name"
+default = true
+
+backend.type = "imap"
+backend.host = "imap.example.com"
+backend.port = 993
+backend.encryption.type = "tls"
+backend.login = "you@example.com"
+backend.auth.type = "password"
+backend.auth.cmd = "pass show email/imap"
+
+message.send.backend.type = "smtp"
+message.send.backend.host = "smtp.example.com"
+message.send.backend.port = 587
+message.send.backend.encryption.type = "start-tls"
+message.send.backend.login = "you@example.com"
+message.send.backend.auth.type = "password"
+message.send.backend.auth.cmd = "pass show email/smtp"
+```
+
+## Hermes Integration Notes
+
+- Reading, listing, searching, moving, deleting all work directly through the terminal tool.
+- Composing/replying/forwarding: piped input (`cat << EOF | himalaya template send`) is recommended for reliability.
+- Use `--output json` for structured output that is easier to parse programmatically.
+- The `himalaya account configure` wizard requires interactive input and should be run with a PTY.
+
+## Common Operations
+
+### List Folders
+
+```bash
+himalaya folder list
+```
+
+### List Emails
+
+```bash
+himalaya envelope list
+himalaya envelope list --folder "Sent"
+himalaya envelope list --page 1 --page-size 20
+```
+
+### Search Emails
+
+```bash
+himalaya envelope list from john@example.com subject meeting
+```
+
+### Read an Email
+
+```bash
+himalaya message read 42
+himalaya message export 42 --full
+```
+
+### Reply to an Email
+
+```bash
+himalaya template reply 42 | sed 's/^$/\nYour reply text here\n/' | himalaya template send
+```
+
+Or:
+
+```bash
+cat << 'EOF' | himalaya template send
+From: you@example.com
+To: sender@example.com
+Subject: Re: Original Subject
+In-Reply-To: <original-message-id>
+
+Your reply here.
+EOF
+```
+
+### Forward an Email
+
+```bash
+himalaya template forward 42 | sed 's/^To:.*/To: newrecipient@example.com/' | himalaya template send
+```
+
+### Write a New Email
+
+```bash
+cat << 'EOF' | himalaya template send
+From: you@example.com
+To: recipient@example.com
+Subject: Test Message
+
+Hello from Himalaya!
+EOF
+```
+
+Or:
+
+```bash
+himalaya message write -H "To:recipient@example.com" -H "Subject:Test" "Message body here"
+```
+
+### Move/Copy Emails
+
+```bash
+himalaya message move 42 "Archive"
+himalaya message copy 42 "Important"
+```
+
+### Delete an Email
+
+```bash
+himalaya message delete 42
+```
+
+### Manage Flags
+
+```bash
+himalaya flag add 42 --flag seen
+himalaya flag remove 42 --flag seen
+```
+
+## Multiple Accounts
+
+```bash
+himalaya account list
+himalaya --account work envelope list
+```

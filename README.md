@@ -202,6 +202,7 @@ scripts/configure-hermes-readonly-integrations.sh
 This installs:
 
 ```text
+hermes/skills/email/himalaya/SKILL.md
 hermes/skills/domain/mit-email-readonly/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
 hermes/skills/domain/piazza-readonly/SKILL.md
@@ -221,6 +222,8 @@ MIT Microsoft 365 mail now has three paths:
 4. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
+
+The repo also installs a customized `himalaya` skill that keeps generic IMAP/SMTP usage available for non-MIT accounts while explicitly routing MIT mailbox work to `mit-email-readonly` first.
 
 Thunderbird install on the Mac mini:
 
