@@ -7,6 +7,16 @@ This repo contains scripts to provision Hermes Agent on the remote Mac mini over
 Tailscale SSH. Connection settings live in local `.env`, which is intentionally
 not tracked by git. Use `.env.example` as the template.
 
+Repo layout:
+
+```text
+scripts/   executable deployment/configuration scripts
+hermes/    files installed into the remote ~/.hermes tree
+```
+
+Keep large Markdown prompts, skills, memory files, and helper payloads under
+`hermes/`. Keep `scripts/` focused on orchestration and file transfer.
+
 Current verified target:
 
 ```text
@@ -92,6 +102,15 @@ The script installs a local Hermes skill named `mit-canvas-course` and a helper:
 
 ```bash
 ~/.hermes/scripts/canvas-course-snapshot.sh
+```
+
+Source files live separately from the shell script:
+
+```text
+hermes/skills/domain/mit-canvas-course/SKILL.md
+hermes/scripts/canvas-course-snapshot.sh
+hermes/memories/MEMORY.md
+hermes/memories/USER.md
 ```
 
 Without `CANVAS_API_TOKEN`, Canvas API endpoints return `401`, so Hermes uses
