@@ -23,7 +23,7 @@ FILES=(
   "$REPO_ROOT/hermes/skills/email/himalaya/SKILL.md:.hermes/skills/email/himalaya/SKILL.md"
   "$REPO_ROOT/hermes/skills/email/himalaya/references/configuration.md:.hermes/skills/email/himalaya/references/configuration.md"
   "$REPO_ROOT/hermes/skills/email/himalaya/references/message-composition.md:.hermes/skills/email/himalaya/references/message-composition.md"
-  "$REPO_ROOT/hermes/skills/domain/mit-email-readonly/SKILL.md:.hermes/skills/domain/mit-email-readonly/SKILL.md"
+  "$REPO_ROOT/hermes/skills/domain/mit-email/SKILL.md:.hermes/skills/domain/mit-email/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza/SKILL.md:.hermes/skills/domain/piazza/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-email-thunderbird.py:.hermes/scripts/mit-email-thunderbird.py"
   "$REPO_ROOT/hermes/scripts/mit-email-applemail.py:.hermes/scripts/mit-email-applemail.py"
@@ -121,7 +121,7 @@ EXPECT_EOF
 }
 
 echo "Configuring Hermes integrations on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email-readonly ~/.hermes/skills/domain/piazza ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
+run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email ~/.hermes/skills/domain/piazza ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
 
 for mapping in "${FILES[@]}"; do
   local_path="${mapping%%:*}"
@@ -182,12 +182,13 @@ REMOTE_CMD
 
 run_remote "$remote_env_cmd"
 run_remote "chmod +x ~/.hermes/scripts/mit-email-thunderbird.py ~/.hermes/scripts/mit-email-applemail.py ~/.hermes/scripts/mit-email-graph.py ~/.hermes/scripts/mit-email-browser.py ~/.hermes/scripts/piazza.py && ~/.hermes/scripts/mit-email-thunderbird.py --help >/dev/null && ~/.hermes/scripts/mit-email-applemail.py --help >/dev/null && ~/.hermes/scripts/mit-email-graph.py --help >/dev/null && ~/.hermes/scripts/piazza.py --help >/dev/null"
+run_remote "rm -rf ~/.hermes/skills/domain/mit-email-readonly"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-thunderbird.py profiles >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; else python3 -m pip install --user websocket-client >/dev/null; python3 ~/.hermes/scripts/mit-email-thunderbird.py profiles >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; fi"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py --help >/dev/null; else python3 -m pip install --user piazza-api >/dev/null; python3 ~/.hermes/scripts/piazza.py --help >/dev/null; fi"
 
-run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email-readonly|piazza' || true"
+run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email|piazza' || true"
 
 echo "Hermes integrations installed."
 echo "MIT email non-browser path on this Mac mini is Apple Mail when Mail.app is configured."

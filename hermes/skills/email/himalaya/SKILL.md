@@ -1,6 +1,6 @@
 ---
 name: himalaya
-description: Generic IMAP/SMTP email CLI for non-MIT accounts or explicitly requested terminal email workflows. Do not use this as the default path for the user's MIT mailbox when the specialized mit-email-readonly workflow applies.
+description: Generic IMAP/SMTP email CLI for non-MIT accounts or explicitly requested terminal email workflows. Do not use this as the default path for the user's MIT mailbox when the specialized mit-email workflow applies.
 version: 1.0.0
 author: community
 license: MIT
@@ -20,7 +20,7 @@ Himalaya is a CLI email client that lets you manage emails from the terminal usi
 
 - This skill is **generic** and should be used for non-MIT accounts or when the user explicitly asks for Himalaya / IMAP / SMTP terminal workflows.
 - For this user's MIT mailbox, **do not use Himalaya as the default path**.
-- Prefer the specialized `mit-email-readonly` workflow instead: Apple Mail first, then Outlook browser fallback.
+- Prefer the specialized `mit-email` workflow instead: Apple Mail first, then Outlook browser fallback.
 
 ## References
 

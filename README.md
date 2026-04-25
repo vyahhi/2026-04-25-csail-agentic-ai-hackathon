@@ -181,16 +181,49 @@ scripts/configure-mit-vpn-globalprotect.sh
 ```
 
 MIT's VPN uses Prisma Access GlobalProtect with portal `gpvpn.mit.edu`. The
-script checks whether GlobalProtect is installed on the Mac mini and opens the
-portal on the Mac mini desktop. Installation and connection require interactive
-MIT Kerberos and Duo approval, so they cannot be completed purely over SSH.
-It also installs a Hermes skill and helper so the live agent can repeat VPN
-status/open/connect/test actions later:
+script installs or updates the Hermes VPN skill/helper on the Mac mini, checks
+the current app/CLI state, and opens the portal on the Mac mini desktop. The
+actual MIT Kerberos login and Duo approval remain interactive, but the rest of
+the workflow can be driven from Hermes or SSH:
 
 ```text
 hermes/skills/domain/mit-vpn-globalprotect/SKILL.md
 hermes/scripts/mit-vpn-globalprotect.sh
 ```
+
+Current verified behavior on the audited Mac mini:
+
+- GlobalProtect is installed and can connect successfully to `gpvpn.mit.edu`
+- MIT-only resources load once connected:
+  - `https://kb.mit.edu`
+  - `https://print.mit.edu`
+  - `https://canvas.mit.edu` (redirects to `https://web.mit.edu/canvas/`)
+- ordinary internet still works while VPN is up
+- Tailscale remained connected during testing
+- the observed routing looks like split/selective routing rather than a full tunnel
+
+Typical setup and verification flow:
+
+1. Run the installer/bootstrap:
+
+```bash
+scripts/configure-mit-vpn-globalprotect.sh
+```
+
+2. On the Mac mini desktop, complete the GlobalProtect / MIT login / Duo flow.
+
+3. Verify from SSH or Hermes:
+
+```bash
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-vpn-globalprotect.sh status'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-vpn-globalprotect.sh test'
+```
+
+4. If the GUI app is already running and the CLI says an old instance exists,
+use the existing GlobalProtect app window on the Mac mini desktop instead of
+starting more CLI instances.
 
 Configure Hermes to reuse a persistent Chrome profile for MIT SSO:
 
@@ -234,7 +267,7 @@ This installs:
 
 ```text
 hermes/skills/email/himalaya/SKILL.md
-hermes/skills/domain/mit-email-readonly/SKILL.md
+hermes/skills/domain/mit-email/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
 hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
@@ -243,21 +276,30 @@ hermes/scripts/mit-email-browser.py
 hermes/scripts/piazza.py
 ```
 
-MIT Microsoft 365 mail now has three paths:
+MIT Microsoft 365 mail now has four practical paths:
 
 1. Apple Mail local mailbox/index on the Mac mini, if the MIT mailbox is configured in Mail.app.
-2. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
-3. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
-4. Saved Outlook browser session as a fallback.
+2. Apple Mail AppleScript fallback through the same helper when direct SQLite access is blocked.
+3. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
+4. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
+5. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
 
-The repo also installs a customized `himalaya` skill that keeps generic IMAP/SMTP usage available for non-MIT accounts while explicitly routing MIT mailbox work to `mit-email-readonly` first.
+The repo also installs a customized `himalaya` skill that keeps generic IMAP/SMTP usage available for non-MIT accounts while explicitly routing MIT mailbox work to `mit-email` first.
 
 Apple Mail is the current preferred non-browser path on the audited Mac mini because
 the MIT mailbox is already present there and `mit-email-applemail.py` can read it.
 Thunderbird is installed and available as a secondary path, but the repo should not
 assume it is the primary mailbox source.
+
+The live remote `mit-email` skill allows explicit state-changing MIT email actions
+when the user asks for them. The default remains read-only. When Hermes composes
+or saves an outbound MIT email message, append:
+
+```text
+Sent by Nikolay's AI agent
+```
 
 Thunderbird install on the Mac mini:
 
