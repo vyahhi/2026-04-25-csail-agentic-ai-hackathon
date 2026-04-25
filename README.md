@@ -138,6 +138,49 @@ Direct printing with `lp` is attempted only if a local MIT print queue is
 configured; otherwise it points the user to Athena Print Center/MobilePrint at
 `https://print.mit.edu`.
 
+Configure read-only MIT email and Piazza helpers:
+
+```bash
+scripts/configure-hermes-readonly-integrations.sh
+```
+
+This installs:
+
+```text
+hermes/skills/domain/mit-email-readonly/SKILL.md
+hermes/skills/domain/piazza-readonly/SKILL.md
+hermes/scripts/mit-email-graph.py
+hermes/scripts/piazza-readonly.py
+```
+
+MIT email uses Microsoft Graph delegated `Mail.Read`. Add a public-client
+Microsoft app ID to `.env`, then run device-code login on the Mac mini:
+
+```text
+MS_GRAPH_CLIENT_ID=...
+MS_GRAPH_TENANT=organizations
+MS_GRAPH_SCOPES=offline_access User.Read Mail.Read
+```
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-graph.py login'
+```
+
+Piazza uses the unofficial `piazza-api` package and is configured only for
+read-only inspection:
+
+```text
+PIAZZA_EMAIL=...
+PIAZZA_PASSWORD=...
+PIAZZA_NETWORK_ID=...
+```
+
+Some Piazza classes use SSO, MFA, or captcha flows that the unofficial API may
+not support. In that case, use browser-provided export/session data instead of
+storing account passwords.
+
 ### Verify
 
 ```bash
@@ -170,6 +213,22 @@ Printer lookup:
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-printer-find.py "building 10"'
+```
+
+MIT email helper:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-graph.py folders'
+```
+
+Piazza helper:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza-readonly.py profile'
 ```
 
 ### Start Hermes
