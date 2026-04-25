@@ -136,7 +136,6 @@ MS_GRAPH_TENANT_B64='$(b64 "${MS_GRAPH_TENANT:-organizations}")' \
 MS_GRAPH_SCOPES_B64='$(b64 "${MS_GRAPH_SCOPES:-offline_access User.Read Mail.Read}")' \
 PIAZZA_EMAIL_B64='$(b64 "${PIAZZA_EMAIL:-}")' \
 PIAZZA_PASSWORD_B64='$(b64 "${PIAZZA_PASSWORD:-}")' \
-PIAZZA_NETWORK_ID_B64='$(b64 "${PIAZZA_NETWORK_ID:-}")' \
 python3 - <<'PY'
 import base64
 import os
@@ -151,7 +150,6 @@ for key in [
     "MS_GRAPH_SCOPES",
     "PIAZZA_EMAIL",
     "PIAZZA_PASSWORD",
-    "PIAZZA_NETWORK_ID",
 ]:
     raw = os.environ.get(f"{key}_B64", "")
     value = base64.b64decode(raw).decode() if raw else ""
@@ -194,4 +192,4 @@ echo "Hermes integrations installed."
 echo "MIT email non-browser path on this Mac mini is Apple Mail when Mail.app is configured."
 echo "Thunderbird remains an optional secondary local-client path."
 echo "MIT Graph auth still requires MS_GRAPH_CLIENT_ID plus: ~/.hermes/scripts/mit-email-graph.py login"
-echo "Piazza auth requires PIAZZA_EMAIL and PIAZZA_PASSWORD. PIAZZA_NETWORK_ID is optional, and the skill can discover courses dynamically."
+echo "Piazza auth requires PIAZZA_EMAIL and PIAZZA_PASSWORD. Course selection is dynamic; use classes first or pass --network-id explicitly when needed."

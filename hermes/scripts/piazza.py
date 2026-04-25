@@ -70,9 +70,6 @@ def available_classes(p):
 def resolve_network_id(args, status=None):
     if getattr(args, "network_id", None):
         return args.network_id.strip()
-    value = os.environ.get("PIAZZA_NETWORK_ID", "").strip()
-    if value:
-        return value
     if status is None:
         raise SystemExit("No Piazza course selected.")
     last_network = (status.get("last_network") or "").strip()

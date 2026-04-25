@@ -356,9 +356,10 @@ PIAZZA_EMAIL=...
 PIAZZA_PASSWORD=...
 ```
 
-`PIAZZA_NETWORK_ID` is optional. If it is unset, the helper prefers the last
-active course or the only visible course in the account. Use `classes` first
-when the account can see more than one course.
+There is no repo-level `PIAZZA_NETWORK_ID` anymore. The helper discovers visible
+courses dynamically and prefers the last active course or the only visible
+course in the account. Use `classes` first when the account can see more than
+one course, or pass `--network-id` explicitly for one-off targeting.
 
 Some Piazza classes use SSO, MFA, or captcha flows that the unofficial API may
 not support. In that case, use browser-provided export/session data instead of
