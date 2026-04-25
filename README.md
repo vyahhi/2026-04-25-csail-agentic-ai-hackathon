@@ -151,6 +151,13 @@ MIT's VPN uses Prisma Access GlobalProtect with portal `gpvpn.mit.edu`. The
 script checks whether GlobalProtect is installed on the Mac mini and opens the
 portal on the Mac mini desktop. Installation and connection require interactive
 MIT Kerberos and Duo approval, so they cannot be completed purely over SSH.
+It also installs a Hermes skill and helper so the live agent can repeat VPN
+status/open/connect/test actions later:
+
+```text
+hermes/skills/domain/mit-vpn-globalprotect/SKILL.md
+hermes/scripts/mit-vpn-globalprotect.sh
+```
 
 Configure read-only MIT email and Piazza helpers:
 
