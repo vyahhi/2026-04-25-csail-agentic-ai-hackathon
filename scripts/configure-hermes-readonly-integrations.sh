@@ -192,7 +192,7 @@ run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.
 run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email-readonly|piazza|piazza-readonly' || true"
 
 echo "Read-only Hermes integrations installed."
-echo "MIT email non-browser path is Thunderbird when configured on the Mac."
-echo "Apple Mail remains the secondary local-client fallback."
+echo "MIT email non-browser path on this Mac mini is Apple Mail when Mail.app is configured."
+echo "Thunderbird remains an optional secondary local-client path."
 echo "MIT Graph auth still requires MS_GRAPH_CLIENT_ID plus: ~/.hermes/scripts/mit-email-graph.py login"
 echo "Piazza auth requires PIAZZA_EMAIL and PIAZZA_PASSWORD. PIAZZA_NETWORK_ID is optional."

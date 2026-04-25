@@ -27,6 +27,23 @@ Model provider: openai-codex
 Default model: gpt-5.4
 ```
 
+Current audited remote state as of 2026-04-25:
+
+```text
+macOS: 26.3 (build 25D125)
+Homebrew: installed at /opt/homebrew/bin/brew
+Hermes CLI: /Users/nicolaw/.local/bin/hermes
+Codex CLI: /opt/homebrew/bin/codex
+ripgrep: /opt/homebrew/bin/rg
+Chrome persistent CDP session: configured on localhost:9222
+Mail.app: installed and MIT mailbox present in Apple Mail
+Thunderbird: installed, profile directory present
+Printer queues via lpstat: none configured locally
+```
+
+This repo documents and deploys the Hermes-related setup only. It does not manage
+or modify any separate remote OpenClaw installation.
+
 ### First-Time Setup
 
 ```bash
@@ -216,14 +233,19 @@ hermes/scripts/piazza-readonly.py
 
 MIT Microsoft 365 mail now has three paths:
 
-1. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
-2. Apple Mail local index on the Mac mini, if the MIT mailbox is configured in Mail.app.
+1. Apple Mail local mailbox/index on the Mac mini, if the MIT mailbox is configured in Mail.app.
+2. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
 3. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
 4. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
 
 The repo also installs a customized `himalaya` skill that keeps generic IMAP/SMTP usage available for non-MIT accounts while explicitly routing MIT mailbox work to `mit-email-readonly` first.
+
+Apple Mail is the current preferred non-browser path on the audited Mac mini because
+the MIT mailbox is already present there and `mit-email-applemail.py` can read it.
+Thunderbird is installed and available as a secondary path, but the repo should not
+assume it is the primary mailbox source.
 
 Thunderbird install on the Mac mini:
 
@@ -266,6 +288,10 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 ```
 
 If Mail.app is not configured with the MIT Microsoft 365 account yet, the helper exits cleanly and tells Hermes to configure Mail first.
+
+The helper first tries the local Apple Mail SQLite index. If that path is blocked
+by macOS permissions, it can fall back to read-only AppleScript queries against
+Mail.app.
 
 Piazza uses the unofficial `piazza-api` package and is configured only for
 read-only inspection:
@@ -322,11 +348,13 @@ MIT email helper:
 ```bash
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-applemail.py list --limit 3'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-graph.py folders'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-email-browser.py list --limit 3'
 ```
 
 Piazza helper:
@@ -338,6 +366,15 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py list --limit 10'
 ```
+
+If Piazza reports `Missing piazza-api`, rerun:
+
+```bash
+scripts/configure-hermes-readonly-integrations.sh
+```
+
+That install step is what provisions the `piazza-api` dependency into the Hermes
+venv on the Mac mini.
 
 ### Start Hermes
 
