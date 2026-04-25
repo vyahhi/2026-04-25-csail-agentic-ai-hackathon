@@ -1,0 +1,208 @@
+[
+  {
+    "name": "Stata Lobby Pharos printers",
+    "type": "pharos",
+    "building": "32",
+    "room": "32-Stata Lobby",
+    "area": "CSAIL / Stata Center",
+    "aliases": ["csail", "stata", "stata center", "building 32", "gates", "dreyfoos"],
+    "hostnames": ["stata-color.mit.edu", "stata-p.mit.edu"],
+    "capabilities": ["color", "black-and-white"],
+    "notes": "Closest public Pharos printer location for CSAIL/Stata. MIT printer locations list color hostname stata-color.mit.edu and black-and-white hostname stata-p.mit.edu.",
+    "source": "MIT Printer Locations KB"
+  },
+  {
+    "name": "CSAIL TIG office printing help",
+    "type": "department",
+    "building": "32",
+    "room": "32-270",
+    "area": "CSAIL / Stata Center",
+    "aliases": ["csail", "tig", "stata", "building 32", "help"],
+    "capabilities": ["support"],
+    "notes": "CSAIL TIG says printing/copy/scan service issues can be handled by emailing help@csail.mit.edu or stopping by 32-270. This is support, not a public printer queue.",
+    "source": "CSAIL TIG printing page"
+  },
+  {
+    "name": "Barker Library Pharos printers",
+    "type": "pharos",
+    "building": "10",
+    "room": "10-500",
+    "area": "Barker Library",
+    "capabilities": ["color"],
+    "notes": "Library printers: 5th floor, past west stairwell; two color printers.",
+    "source": "MIT Libraries printer locations"
+  },
+  {
+    "name": "Hayden Library Pharos printers",
+    "type": "pharos",
+    "building": "14S",
+    "room": "14S-100",
+    "area": "Hayden Library",
+    "capabilities": ["color", "black-and-white"],
+    "notes": "1st floor, center scan and print room; two color and one black-and-white printer.",
+    "source": "MIT Libraries printer locations"
+  },
+  {
+    "name": "Dewey Library Pharos printers",
+    "type": "pharos",
+    "building": "E53",
+    "room": "E53-100",
+    "area": "Dewey Library",
+    "capabilities": ["color", "black-and-white"],
+    "notes": "1st floor near computer cluster; one color and one black-and-white printer. 24/7 space also has one color printer.",
+    "source": "MIT Libraries printer locations"
+  },
+  {
+    "name": "Lewis Music Library Pharos printer",
+    "type": "pharos",
+    "building": "14E",
+    "room": "14E-109",
+    "area": "Lewis Music Library",
+    "capabilities": ["color"],
+    "notes": "1st floor, after service desk; one color printer.",
+    "source": "MIT Libraries printer locations"
+  },
+  {
+    "name": "Rotch Library Pharos printers",
+    "type": "pharos",
+    "building": "7",
+    "room": "7-238",
+    "area": "Rotch Library",
+    "capabilities": ["color"],
+    "notes": "2nd floor, adjacent to Athena cluster; two color printers.",
+    "source": "MIT Libraries printer locations"
+  },
+  {
+    "name": "Student Center Athena cluster printers",
+    "type": "pharos",
+    "building": "W20",
+    "room": "W20-575",
+    "area": "Stratton Student Center",
+    "capabilities": ["color", "black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 4 Athena cluster printer",
+    "type": "pharos",
+    "building": "4",
+    "room": "4-167",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 11 public printer",
+    "type": "pharos",
+    "building": "11",
+    "room": "11-112",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 12 public printer",
+    "type": "pharos",
+    "building": "12",
+    "room": "12-182",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 38 public printer",
+    "type": "pharos",
+    "building": "38",
+    "room": "38-370",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 56 public printer",
+    "type": "pharos",
+    "building": "56",
+    "room": "56-129",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 66 public printer",
+    "type": "pharos",
+    "building": "66",
+    "room": "66-080",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "E51 public printer",
+    "type": "pharos",
+    "building": "E51",
+    "room": "E51-075",
+    "area": "East campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Building 1 public printer",
+    "type": "pharos",
+    "building": "1",
+    "room": "1-150",
+    "area": "Main campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Outside room 1-150; public student printer location from MIT computing map.",
+    "source": "MIT computing map"
+  },
+  {
+    "name": "Tang Hall Pharos printer",
+    "type": "pharos",
+    "building": "W84",
+    "room": "Tang Hall",
+    "area": "West campus",
+    "capabilities": ["black-and-white"],
+    "notes": "Location name reported as W84: Tang Hall.",
+    "source": "Tang Hall computing page"
+  },
+  {
+    "name": "Math Department rainbow",
+    "type": "department",
+    "building": "2",
+    "room": "2-090a",
+    "area": "Math Department",
+    "queue": "rainbow",
+    "capabilities": ["color", "duplex"],
+    "notes": "Department printer; may require MIT network and department access.",
+    "source": "MIT Math Department printing page"
+  },
+  {
+    "name": "Math Department stanlee",
+    "type": "department",
+    "building": "2",
+    "room": "2-252",
+    "area": "Math Department",
+    "queue": "stanlee",
+    "capabilities": ["color", "copy", "scan", "duplex", "staple"],
+    "notes": "Department copier/printer; may require MIT network and department access.",
+    "source": "MIT Math Department printing page"
+  },
+  {
+    "name": "Math Department hawthorne",
+    "type": "department",
+    "building": "2",
+    "room": "2-350",
+    "area": "Math Department",
+    "queue": "hawthorne",
+    "capabilities": ["color", "copy", "scan", "duplex"],
+    "notes": "Department copier/printer; may require MIT network and department access.",
+    "source": "MIT Math Department printing page"
+  }
+]

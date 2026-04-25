@@ -117,6 +117,27 @@ Without `CANVAS_API_TOKEN`, Canvas API endpoints return `401`, so Hermes uses
 public page reads only. Keep this integration view-only: use `GET` requests
 only and do not submit or modify course content.
 
+Configure MIT printer lookup and print-prep helpers:
+
+```bash
+scripts/configure-hermes-mit-printers.sh
+```
+
+This installs:
+
+```text
+hermes/skills/domain/mit-printers/SKILL.md
+hermes/data/mit-printers.json
+hermes/scripts/mit-printer-find.py
+hermes/scripts/mit-print-file.sh
+```
+
+The Mac mini is not on the local MIT network. The printer skill therefore
+focuses on finding nearby Pharos printers and preparing upload/release guidance.
+Direct printing with `lp` is attempted only if a local MIT print queue is
+configured; otherwise it points the user to Athena Print Center/MobilePrint at
+`https://print.mit.edu`.
+
 ### Verify
 
 ```bash
@@ -141,6 +162,14 @@ Canvas snapshot:
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/canvas-course-snapshot.sh'
+```
+
+Printer lookup:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-printer-find.py "building 10"'
 ```
 
 ### Start Hermes
