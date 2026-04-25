@@ -23,6 +23,7 @@ FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-email-readonly/SKILL.md:.hermes/skills/domain/mit-email-readonly/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza-readonly/SKILL.md:.hermes/skills/domain/piazza-readonly/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-email-graph.py:.hermes/scripts/mit-email-graph.py"
+  "$REPO_ROOT/hermes/scripts/mit-email-browser.py:.hermes/scripts/mit-email-browser.py"
   "$REPO_ROOT/hermes/scripts/piazza-readonly.py:.hermes/scripts/piazza-readonly.py"
 )
 
@@ -175,7 +176,9 @@ REMOTE_CMD
 )"
 
 run_remote "$remote_env_cmd"
-run_remote "chmod +x ~/.hermes/scripts/mit-email-graph.py ~/.hermes/scripts/piazza-readonly.py && ~/.hermes/scripts/mit-email-graph.py --help >/dev/null"
+run_remote "chmod +x ~/.hermes/scripts/mit-email-graph.py ~/.hermes/scripts/mit-email-browser.py ~/.hermes/scripts/piazza-readonly.py && ~/.hermes/scripts/mit-email-graph.py --help >/dev/null"
+
+run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; else python3 -m pip install --user websocket-client >/dev/null; python3 ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; fi"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza-readonly.py --help >/dev/null; else python3 -m pip install --user piazza-api >/dev/null; python3 ~/.hermes/scripts/piazza-readonly.py --help >/dev/null; fi"
 
