@@ -73,6 +73,31 @@ TELEGRAM_HOME_CHANNEL=152157536
 user or chat IDs, not `@username` handles. Message @userinfobot to find your
 numeric user ID, or send `/start` to the bot and inspect Bot API updates.
 
+Configure the MIT Canvas course target:
+
+```bash
+scripts/configure-hermes-canvas.sh
+```
+
+Default `.env` values:
+
+```text
+CANVAS_BASE_URL=https://canvas.mit.edu
+CANVAS_COURSE_ID=37338
+CANVAS_COURSE_URL=https://canvas.mit.edu/courses/37338
+CANVAS_API_TOKEN=
+```
+
+The script installs a local Hermes skill named `mit-canvas-course` and a helper:
+
+```bash
+~/.hermes/scripts/canvas-course-snapshot.sh
+```
+
+Without `CANVAS_API_TOKEN`, Canvas API endpoints return `401`, so Hermes uses
+public page reads only. Keep this integration view-only: use `GET` requests
+only and do not submit or modify course content.
+
 ### Verify
 
 ```bash
@@ -89,6 +114,14 @@ codex CLI: installed
 ripgrep (rg): installed
 Default model in ~/.hermes/config.yaml: gpt-5.5
 Provider in ~/.hermes/config.yaml: openai-codex
+```
+
+Canvas snapshot:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/canvas-course-snapshot.sh'
 ```
 
 ### Start Hermes
