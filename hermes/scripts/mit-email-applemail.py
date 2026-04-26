@@ -16,14 +16,32 @@ def preferred_email():
     return (os.environ.get("MIT_EMAIL_ADDRESS") or "").strip().lower()
 
 
+def candidate_db_paths():
+    root = Path.home() / "Library" / "Mail"
+    direct = root / "V10" / "MailData" / "Envelope Index"
+    candidates = []
+    if direct.exists():
+        candidates.append(direct)
+    if root.exists():
+        versioned = sorted(root.glob("V*/MailData/Envelope Index"))
+        for path in versioned:
+            if path not in candidates:
+                candidates.append(path)
+    return list(reversed(candidates))
+
+
 def db_path():
+    for path in candidate_db_paths():
+        if path.exists():
+            return path
     return Path.home() / "Library" / "Mail" / "V10" / "MailData" / "Envelope Index"
 
 
 def connect_db():
     path = db_path()
     if not path.exists():
-        raise FileNotFoundError(f"Apple Mail database not found: {path}")
+        checked = ", ".join(str(p) for p in candidate_db_paths()) or str(path)
+        raise FileNotFoundError(f"Apple Mail database not found. Checked: {checked}")
     uri = f"file:{path}?mode=ro"
     conn = sqlite3.connect(uri, uri=True)
     conn.row_factory = sqlite3.Row
@@ -282,11 +300,27 @@ def is_authorization_error(exc):
     return "authorization denied" in msg or "operation not permitted" in msg
 
 
+def should_fallback_to_applescript(exc):
+    if is_authorization_error(exc):
+        return True
+    if isinstance(exc, (sqlite3.Error, OSError, FileNotFoundError)):
+        return True
+    msg = str(exc).lower()
+    markers = [
+        "unable to open database file",
+        "readonly database",
+        "no such table",
+        "database disk image is malformed",
+        "database is locked",
+    ]
+    return any(marker in msg for marker in markers)
+
+
 def list_mailboxes(args):
     try:
         result = list_mailboxes_db()
     except Exception as exc:
-        if not is_authorization_error(exc):
+        if not should_fallback_to_applescript(exc):
             raise
         result = list_mailboxes_applescript()
         result["fallback_reason"] = str(exc)
@@ -297,7 +331,7 @@ def list_messages(args):
     try:
         result = list_messages_db(args)
     except Exception as exc:
-        if not is_authorization_error(exc):
+        if not should_fallback_to_applescript(exc):
             raise
         result = list_messages_applescript(args)
         result["fallback_reason"] = str(exc)

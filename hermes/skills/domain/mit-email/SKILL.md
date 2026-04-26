@@ -27,7 +27,7 @@ MIT email is Microsoft 365/Outlook.
 ~/.hermes/scripts/mit-email-applemail.py list --limit 10
 ```
 
-2. If Apple Mail direct SQLite access is blocked with an error like `sqlite3.DatabaseError: authorization denied`, use the same helper anyway — it automatically falls back to read-only AppleScript queries against the Mail app:
+2. If Apple Mail direct SQLite access fails for any local reason such as `authorization denied`, `unable to open database file`, or Mail database version drift, use the same helper anyway — it automatically falls back to read-only AppleScript queries against the Mail app:
 
 ```bash
 ~/.hermes/scripts/mit-email-applemail.py mailboxes

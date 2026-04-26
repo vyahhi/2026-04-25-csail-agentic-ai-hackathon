@@ -29,13 +29,21 @@ def load_env_file():
 
 
 def run(cmd, timeout=20):
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-    return {
-        "ok": proc.returncode == 0,
-        "code": proc.returncode,
-        "stdout": proc.stdout.strip(),
-        "stderr": proc.stderr.strip(),
-    }
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return {
+            "ok": proc.returncode == 0,
+            "code": proc.returncode,
+            "stdout": proc.stdout.strip(),
+            "stderr": proc.stderr.strip(),
+        }
+    except FileNotFoundError as exc:
+        return {
+            "ok": False,
+            "code": 127,
+            "stdout": "",
+            "stderr": str(exc),
+        }
 
 
 def hermes_bin():
@@ -93,10 +101,27 @@ def check_browser():
     script = str(Path.home() / ".hermes" / "scripts" / "persistent-browser-cdp.sh")
     if not Path(script).exists():
         return {"ok": False, "detail": "CDP helper not installed"}
-    result = status_from_run([script, "status"])
-    detail = result["detail"].strip().lower()
-    result["ok"] = result["ok"] and detail.startswith("running ")
-    return result
+    status = status_from_run([script, "status"])
+    detail = status["detail"].strip()
+    if status["ok"] and detail.lower().startswith("running "):
+        return status
+
+    start = status_from_run([script, "start"], timeout=45)
+    status_after = status_from_run([script, "status"])
+    final_detail = status_after["detail"].strip()
+    ok = status_after["ok"] and final_detail.lower().startswith("running ")
+    details = []
+    if detail:
+        details.append(f"initial: {detail}")
+    if start.get("detail"):
+        details.append(f"start: {start['detail'].strip()}")
+    if final_detail:
+        details.append(f"final: {final_detail}")
+    return {
+        "ok": ok,
+        "detail": "\n".join(details) if details else final_detail,
+        "auto_recovered": ok,
+    }
 
 
 def check_gateway():

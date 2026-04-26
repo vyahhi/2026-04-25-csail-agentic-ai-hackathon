@@ -16,11 +16,11 @@ Use this skill when the user asks whether Hermes is working, what is broken, or 
 ## What it checks
 
 - MIT VPN reachability through the KB access test
-- persistent Chrome CDP status
+- persistent Chrome CDP status, with a restart attempt if it is down
 - Hermes gateway status
 - Telegram configuration and busy input mode
 - Canvas API token reachability
-- MIT email via Apple Mail helper
+- MIT email via Apple Mail helper, including AppleScript fallback when direct SQLite access fails
 - MIT email via saved Outlook browser session
 - Piazza course visibility
 
