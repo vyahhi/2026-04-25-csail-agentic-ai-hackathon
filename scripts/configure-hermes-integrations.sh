@@ -27,6 +27,7 @@ FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-directory/SKILL.md:.hermes/skills/domain/mit-directory/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/mit-status/SKILL.md:.hermes/skills/domain/mit-status/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza/SKILL.md:.hermes/skills/domain/piazza/SKILL.md"
+  "$REPO_ROOT/hermes/skills/productivity/simple-pdf-generation/SKILL.md:.hermes/skills/productivity/simple-pdf-generation/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-email-applemail.py:.hermes/scripts/mit-email-applemail.py"
   "$REPO_ROOT/hermes/scripts/mit-email-browser.py:.hermes/scripts/mit-email-browser.py"
   "$REPO_ROOT/hermes/scripts/mit-status.py:.hermes/scripts/mit-status.py"
@@ -122,7 +123,7 @@ EXPECT_EOF
 }
 
 echo "Configuring Hermes integrations on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email ~/.hermes/skills/domain/mit-directory ~/.hermes/skills/domain/mit-status ~/.hermes/skills/domain/piazza ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
+run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email ~/.hermes/skills/domain/mit-directory ~/.hermes/skills/domain/mit-status ~/.hermes/skills/domain/piazza ~/.hermes/skills/productivity/simple-pdf-generation ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
 
 for mapping in "${FILES[@]}"; do
   local_path="${mapping%%:*}"
@@ -189,7 +190,7 @@ run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py --help >/dev/null; else python3 -m pip install --user piazza-api >/dev/null; python3 ~/.hermes/scripts/piazza.py --help >/dev/null; fi"
 
-run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email|mit-directory|mit-status|piazza' || true"
+run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email|mit-directory|mit-status|piazza|simple-pdf-generation' || true"
 
 echo "Hermes integrations installed."
 echo "MIT email supported paths on this Mac mini are Apple Mail first and Outlook browser-session fallback second."

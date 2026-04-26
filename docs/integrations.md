@@ -144,6 +144,7 @@ hermes/skills/domain/mit-email/SKILL.md
 hermes/skills/domain/mit-directory/SKILL.md
 hermes/skills/domain/mit-status/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
+hermes/skills/productivity/simple-pdf-generation/SKILL.md
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-browser.py
 hermes/scripts/mit-status.py
@@ -161,6 +162,9 @@ Not part of the supported active path:
 
 MIT directory lookups use public LDAP on `ldap.mit.edu`; the directory website
 is not the primary path on the Mac mini.
+
+`simple-pdf-generation` is kept because Hermes often needs to create short
+PDFs for printing or sharing when heavier conversion tools are unavailable.
 
 Mail checks:
 
