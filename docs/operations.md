@@ -55,6 +55,9 @@ HERMES_MIT_BRIEFING_DELIVER=telegram
 HERMES_MIT_BRIEFING_WORKDIR=
 ```
 
+`HERMES_MIT_BRIEFING_WORKDIR` is optional. If set, it must be an absolute path
+on the Mac mini, not a local path from this machine.
+
 Cron checks:
 
 ```bash
