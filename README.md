@@ -70,7 +70,7 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 - [Setup](docs/setup.md)
 - [Integrations](docs/integrations.md)
 - [Operations](docs/operations.md)
-- [Landing page](docs/landing-page.md)
+- [Landing page](landing/README.md)
 
 ## Notes
 
