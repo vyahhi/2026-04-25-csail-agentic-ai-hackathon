@@ -33,7 +33,9 @@ Include:
 3. today's and near-term Canvas deadlines or modules that need attention
 4. MIT assistant health warnings only if something is degraded
 
-Use the installed MIT integrations and skills. If a source is unavailable, say so briefly and continue.
+Use only the installed MIT integrations and skills listed for this job.
+Do not mention Google Calendar, Google Workspace, or any calendar source unless a calendar integration is explicitly configured for this Hermes instance.
+If one of the listed sources is unavailable, say so briefly and continue.
 Deliver a Telegram-friendly summary.
 EOF
 )"
@@ -114,16 +116,23 @@ hermes = os.path.expanduser("~/.local/bin/hermes")
 def clean(text: str) -> str:
     return re.sub(r'\\x1b\\[[0-9;]*m', '', text)
 
-listed = subprocess.run(
+listed_raw = subprocess.run(
     f'{hermes} cron list',
     shell=True,
     check=True,
     capture_output=True,
     text=True,
 ).stdout
-for line in clean(listed).splitlines():
-    if name in line:
-        job_id = line.strip().split()[0]
+listed = clean(listed_raw)
+for line in listed.splitlines():
+    match = re.match(r'^\s*([0-9a-f]{12})\s+\[', line)
+    if not match:
+        continue
+    job_id = match.group(1)
+    block_start = listed.find(line)
+    next_block = listed.find("\n\n", block_start)
+    block = listed[block_start:] if next_block == -1 else listed[block_start:next_block]
+    if f"Name:      {name}" in block:
         subprocess.run(
             f'{hermes} cron remove {job_id}',
             shell=True,

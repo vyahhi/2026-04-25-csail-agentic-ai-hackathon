@@ -44,7 +44,12 @@ Current default job:
 name: mit-daily-briefing
 schedule: 0 8 * * *
 delivery: telegram
+sources: MIT email, Piazza, Canvas, MIT assistant status
 ```
+
+Calendar is not part of the briefing unless a calendar integration is added and
+the cron prompt is updated. The briefing should not mention Google Calendar or
+Google Workspace in the current setup.
 
 Optional `.env` overrides:
 
