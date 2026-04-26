@@ -109,12 +109,13 @@ schedule = dec("SCHEDULE_B64")
 deliver = dec("DELIVER_B64")
 workdir = dec("WORKDIR_B64")
 prompt = dec("PROMPT_B64")
+hermes = "$HOME/.local/bin/hermes"
 
 def clean(text: str) -> str:
     return re.sub(r'\\x1b\\[[0-9;]*m', '', text)
 
 listed = subprocess.run(
-    '~/.local/bin/hermes cron list',
+    f'{hermes} cron list',
     shell=True,
     check=True,
     capture_output=True,
@@ -124,14 +125,14 @@ for line in clean(listed).splitlines():
     if name in line:
         job_id = line.strip().split()[0]
         subprocess.run(
-            f'~/.local/bin/hermes cron remove {job_id}',
+            f'{hermes} cron remove {job_id}',
             shell=True,
             check=True,
         )
 
 subprocess.run(
     " ".join([
-        shlex.quote("~/.local/bin/hermes"),
+        shlex.quote(hermes),
         "cron", "create",
         shlex.quote(schedule),
         shlex.quote(prompt),
@@ -146,7 +147,7 @@ subprocess.run(
     shell=True,
     check=True,
 )
-subprocess.run('~/.local/bin/hermes cron list', shell=True, check=True)
+subprocess.run(f'{hermes} cron list', shell=True, check=True)
 PY
 REMOTE_CMD
 )"
