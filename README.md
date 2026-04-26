@@ -10,6 +10,7 @@ This repo manages the Hermes setup only. It does not manage any separate remote 
 scripts/  deployment and configuration entrypoints
 hermes/   files synced into ~/.hermes on the Mac mini
 docs/     setup, integration, and operations detail
+index.html  landing page (deployed at vyahhi.github.io/tim/)
 ```
 
 ## Verified Target
@@ -62,6 +63,17 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-status.py --summary'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.local/bin/hermes cron list'
+```
+
+## Landing Page
+
+Live at **https://vyahhi.github.io/tim/**
+
+Source: `index.html` in this repo. To update the deployed page after editing `index.html`:
+
+```bash
+cp index.html /tmp/pages-deploy/tim/
+cd /tmp/pages-deploy && git add tim/index.html && git commit -m "Update Tim landing page" && git push
 ```
 
 ## Docs
