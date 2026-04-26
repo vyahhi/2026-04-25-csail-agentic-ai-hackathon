@@ -37,7 +37,6 @@ Codex CLI: /opt/homebrew/bin/codex
 ripgrep: /opt/homebrew/bin/rg
 Chrome persistent CDP session: configured on localhost:9222
 Mail.app: installed and MIT mailbox present in Apple Mail
-Thunderbird: installed, profile directory present
 Printer queues via lpstat: none configured locally
 ```
 
@@ -169,7 +168,9 @@ off-campus Mac mini; when that happens, the helper reports the source failure
 and returns only sources it could fetch live. The Mac mini is not on the local
 MIT network, so direct printing with `lp` is attempted only if a local MIT print
 queue is configured. Remote Pharos printing uses Athena Print Center/MobilePrint
-at `https://print.mit.edu`. Hermes also has a browser-backed helper that can
+at `https://print.mit.edu`. I did not find a documented stable public API for
+remote MobilePrint submission/release, so Hermes currently uses a browser-backed
+helper for that path. Hermes also has a browser-backed helper that can
 upload and release jobs through the persistent Chrome session when MIT SSO is
 still valid. The shell wrapper falls back to instruction-only output only if the
 browser path is not authenticated or the site flow is blocked.
@@ -270,21 +271,17 @@ hermes/skills/email/himalaya/SKILL.md
 hermes/skills/domain/mit-email/SKILL.md
 hermes/skills/domain/mit-status/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
-hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
-hermes/scripts/mit-email-graph.py
 hermes/scripts/mit-email-browser.py
 hermes/scripts/mit-status.py
 hermes/scripts/piazza.py
 ```
 
-MIT Microsoft 365 mail now has four practical paths:
+Supported now on this Mac mini:
 
 1. Apple Mail local mailbox/index on the Mac mini, if the MIT mailbox is configured in Mail.app.
 2. Apple Mail AppleScript fallback through the same helper when direct SQLite access is blocked.
-3. Thunderbird local mailbox files on the Mac mini, if the MIT mailbox is configured in Thunderbird.
-4. Microsoft Graph delegated `Mail.Read`, if you provide a public-client app ID.
-5. Saved Outlook browser session as a fallback.
+3. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
 
@@ -292,8 +289,6 @@ The repo also installs a customized `himalaya` skill that keeps generic IMAP/SMT
 
 Apple Mail is the current preferred non-browser path on the audited Mac mini because
 the MIT mailbox is already present there and `mit-email-applemail.py` can read it.
-Thunderbird is installed and available as a secondary path, but the repo should not
-assume it is the primary mailbox source.
 
 The live remote `mit-email` skill allows explicit state-changing MIT email actions
 when the user asks for them. The default remains read-only. When Hermes composes
@@ -301,37 +296,6 @@ or saves an outbound MIT email message, append:
 
 ```text
 Sent by Nikolay's AI agent
-```
-
-Thunderbird install on the Mac mini:
-
-```bash
-scripts/install-thunderbird-on-mac-mini.sh
-```
-
-Thunderbird local-mail verification:
-
-```bash
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-thunderbird.py profiles'
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-thunderbird.py mailboxes --inbox-only'
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
-```
-
-Graph setup:
-
-```text
-MS_GRAPH_CLIENT_ID=...
-MS_GRAPH_TENANT=organizations
-MS_GRAPH_SCOPES=offline_access User.Read Mail.Read
-```
-
-```bash
-set -a; source .env; set +a
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-graph.py login'
 ```
 
 Apple Mail setup and verification:
@@ -359,6 +323,16 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 That snapshot checks VPN reachability, persistent browser state, gateway status,
 Telegram queue mode, Canvas API reachability, MIT email via Apple Mail and
 browser fallback, and Piazza visibility.
+
+Not deployed by default:
+
+- `hermes/scripts/mit-email-thunderbird.py`
+- `hermes/scripts/mit-email-graph.py`
+- `scripts/install-thunderbird-on-mac-mini.sh`
+
+Those remain in the repo only as optional experiments/future paths. They are not
+part of the supported active MIT email setup on this Mac mini and are not
+installed by `scripts/configure-hermes-integrations.sh`.
 
 Piazza uses the unofficial `piazza-api` package. The helper supports account-wide
 course discovery first, and the current remote skill also allows explicit
@@ -418,10 +392,6 @@ MIT email helper:
 set -a; source .env; set +a
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-applemail.py list --limit 3'
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-thunderbird.py list --limit 3'
-ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
-  '~/.hermes/scripts/mit-email-graph.py folders'
 ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-email-browser.py list --limit 3'
 ```
