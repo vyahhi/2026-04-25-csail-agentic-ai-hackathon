@@ -56,4 +56,3 @@ open -a Mail
 - `~/.hermes/scripts/mit-email-applemail.py` reads Apple Mail's local `Envelope Index` SQLite database. On macOS, this may fail with `authorization denied` if the current session lacks the required Mail/Full Disk Access permissions.
 - The Apple Mail helper currently provides the primary practical read path, with AppleScript as the fallback under the same helper.
 - Apple Mail is the intended primary path for this user's MIT mailbox on this Mac mini.
-- Thunderbird and Microsoft Graph are not the default workflow for this user.
