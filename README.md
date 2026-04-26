@@ -268,11 +268,13 @@ This installs:
 ```text
 hermes/skills/email/himalaya/SKILL.md
 hermes/skills/domain/mit-email/SKILL.md
+hermes/skills/domain/mit-status/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
 hermes/scripts/mit-email-thunderbird.py
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-graph.py
 hermes/scripts/mit-email-browser.py
+hermes/scripts/mit-status.py
 hermes/scripts/piazza.py
 ```
 
@@ -346,6 +348,17 @@ If Mail.app is not configured with the MIT Microsoft 365 account yet, the helper
 The helper first tries the local Apple Mail SQLite index. If that path is blocked
 by macOS permissions, it can fall back to read-only AppleScript queries against
 Mail.app.
+
+The repo also installs a unified MIT assistant health helper:
+
+```bash
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/scripts/mit-status.py'
+```
+
+That snapshot checks VPN reachability, persistent browser state, gateway status,
+Telegram queue mode, Canvas API reachability, MIT email via Apple Mail and
+browser fallback, and Piazza visibility.
 
 Piazza uses the unofficial `piazza-api` package. The helper supports account-wide
 course discovery first, and the current remote skill also allows explicit
