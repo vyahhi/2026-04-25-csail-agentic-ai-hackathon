@@ -42,6 +42,7 @@ scripts/configure-mit-vpn-globalprotect.sh
 scripts/configure-hermes-browser-cdp.sh
 scripts/configure-hermes-integrations.sh
 scripts/configure-hermes-cron.sh
+scripts/configure-hermes-alerts.sh
 ```
 
 ## Common Commands

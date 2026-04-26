@@ -67,6 +67,36 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.local/bin/hermes cron list'
 ```
 
+Trigger one live daily-briefing test run:
+
+```bash
+scripts/test-hermes-briefing-cron.sh
+```
+
+## Degraded Alerts
+
+Install a direct Telegram degraded-only alert service:
+
+```bash
+scripts/configure-hermes-alerts.sh
+```
+
+Default interval:
+
+```text
+HERMES_MIT_ALERT_INTERVAL_SECONDS=900
+```
+
+The service runs `~/.hermes/scripts/mit-degraded-alert.py --send` and sends a
+Telegram message only when one or more MIT assistant checks are degraded.
+
+Manual test:
+
+```bash
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-degraded-alert.py --test'
+```
+
 ## Common Remote Commands
 
 Doctor:

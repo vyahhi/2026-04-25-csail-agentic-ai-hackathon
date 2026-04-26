@@ -156,8 +156,6 @@ Current supported mail paths:
 
 Not part of the supported active path:
 
-- Graph
-- Thunderbird
 - raw IMAP password auth
 
 Mail checks:
