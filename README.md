@@ -72,8 +72,9 @@ Live at **https://vyahhi.github.io/tim/**
 Source: `index.html` in this repo. To update the deployed page after editing `index.html`:
 
 ```bash
-cp index.html /tmp/pages-deploy/tim/
-cd /tmp/pages-deploy && git add tim/index.html && git commit -m "Update Tim landing page" && git push
+git clone https://github.com/vyahhi/vyahhi.github.io.git /tmp/vyahhi.github.io
+cp index.html /tmp/vyahhi.github.io/tim/
+cd /tmp/vyahhi.github.io && git add tim/index.html && git commit -m "Update Tim landing page" && git push
 ```
 
 ## Docs
