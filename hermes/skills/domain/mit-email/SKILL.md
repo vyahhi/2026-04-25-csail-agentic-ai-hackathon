@@ -16,7 +16,7 @@ MIT email is Microsoft 365/Outlook.
 - Default to read-only behavior unless the user explicitly asks for a state-changing action.
 - When the user explicitly asks to send, reply, forward, draft, move, archive, delete, or otherwise modify mailbox state, those write actions are allowed.
 - Summarize mail carefully; quote only short snippets when needed.
-- For any outbound email or saved draft created by the agent, append the footer: `Sent by MIT assistant`.
+- For any outbound email or saved draft created by the agent, append the footer: `Sent by Nikolay's AI agent`.
 
 ## Default workflow
 
