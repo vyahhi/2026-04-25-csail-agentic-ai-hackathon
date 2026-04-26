@@ -47,6 +47,20 @@ def hermes_bin():
     return "hermes"
 
 
+def hermes_python():
+    venv_python = Path.home() / ".hermes" / "hermes-agent" / "venv" / "bin" / "python"
+    if venv_python.exists():
+        return str(venv_python)
+    return sys.executable
+
+
+def helper_cmd(helper, *args):
+    helper_path = Path(helper)
+    if helper_path.suffix == ".py":
+        return [hermes_python(), str(helper_path), *args]
+    return [str(helper_path), *args]
+
+
 def status_from_run(cmd, timeout=20, detail_from_stdout=True):
     result = run(cmd, timeout=timeout)
     detail = result["stdout"] if detail_from_stdout and result["stdout"] else result["stderr"]
@@ -148,7 +162,7 @@ def check_apple_mail():
     helper = str(Path.home() / ".hermes" / "scripts" / "mit-email-applemail.py")
     if not Path(helper).exists():
         return {"ok": False, "detail": "Apple Mail helper not installed"}
-    result = run([helper, "list", "--limit", "1"], timeout=30)
+    result = run(helper_cmd(helper, "list", "--limit", "1"), timeout=30)
     detail = result["stdout"] or result["stderr"]
     subject = None
     if result["ok"]:
@@ -165,7 +179,7 @@ def check_outlook_browser():
     helper = str(Path.home() / ".hermes" / "scripts" / "mit-email-browser.py")
     if not Path(helper).exists():
         return {"ok": False, "detail": "Outlook browser helper not installed"}
-    result = run([sys.executable if helper.endswith(".py") else helper, helper, "list", "--limit", "1"] if helper.endswith(".py") else [helper, "list", "--limit", "1"], timeout=30)
+    result = run(helper_cmd(helper, "list", "--limit", "1"), timeout=30)
     detail = result["stdout"] or result["stderr"]
     subject = None
     if result["ok"]:
@@ -183,7 +197,7 @@ def check_piazza():
     helper = str(Path.home() / ".hermes" / "scripts" / "piazza.py")
     if not Path(helper).exists():
         return {"ok": False, "detail": "Piazza helper not installed"}
-    result = run([sys.executable if helper.endswith(".py") else helper, helper, "classes"] if helper.endswith(".py") else [helper, "classes"], timeout=30)
+    result = run(helper_cmd(helper, "classes"), timeout=30)
     detail = result["stdout"] or result["stderr"]
     classes = None
     if result["ok"]:
