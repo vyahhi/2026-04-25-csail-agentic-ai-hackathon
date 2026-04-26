@@ -1,8 +1,10 @@
-# 2026-04-25-csail-agentic-ai-hackathon
+# Tim — MIT Personal AI Assistant
 
-Hermes deployment and operations repo for the remote MIT-focused Mac mini assistant.
+Built at the [CSAIL Agentic AI Hackathon](https://www.csail.mit.edu/event/agentic-ai-hackathon) · April 2026
 
-This repo manages the Hermes setup only. It does not manage any separate remote OpenClaw installation.
+Deployment and operations repo for Tim, a personal AI assistant for the MIT community.
+
+This repo manages the Hermes harness setup only. It does not manage any separate remote OpenClaw installation.
 
 ## Repo Layout
 
