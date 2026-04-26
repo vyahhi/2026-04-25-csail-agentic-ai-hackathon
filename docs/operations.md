@@ -133,6 +133,47 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.hermes/scripts/mit-printer-find.py "building 10"'
 ```
 
+## Remote Skill Audit
+
+Check all remote Hermes skills and decide whether repo updates are needed:
+
+```bash
+scripts/audit-remote-hermes-skills.sh --show-diff
+```
+
+The audit is read-only by default. It fetches `~/.hermes/skills` from the Mac
+mini, compares every repo-owned skill under `hermes/skills`, lists remote-only
+skills, and scans for known private/local identifiers.
+
+Decision rules:
+
+- commit repo-owned project skill improvements after sanitizing private details
+- keep repo-local corrections when the remote is stale, such as `gpt-5.5` vs an
+  older remote `gpt-5.4`
+- do not import hub/bundled marketplace skills just because they exist remotely
+- do not commit specific course, thread, person, host, token, or account facts
+  unless they are intentionally public repo content
+
+If a remote repo-owned skill should be reviewed locally:
+
+```bash
+scripts/audit-remote-hermes-skills.sh --import-repo-owned --keep-snapshot
+git diff -- hermes/skills
+```
+
+Only commit and push after reviewing the diff and removing private examples or
+remote-specific stale choices.
+
+For a clean Codex session that should run the whole loop autonomously:
+
+```bash
+scripts/audit-remote-hermes-skills.sh --codex-autonomous --codex-model gpt-5.5
+```
+
+That mode fetches the full remote skill tree, then launches `codex exec` with
+the snapshot path and this repo's sync policy. Codex should make no commit when
+the remaining diffs are intentional.
+
 ## Notes
 
 - MagicDNS hostnames are only reachable from devices in the Tailscale tailnet.

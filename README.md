@@ -65,6 +65,12 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.local/bin/hermes cron list'
 ```
 
+Skill sync audit:
+
+```bash
+scripts/audit-remote-hermes-skills.sh --show-diff
+```
+
 ## Docs
 
 - [Setup](docs/setup.md)
