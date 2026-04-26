@@ -2,50 +2,15 @@
 import argparse
 import json
 import os
-import sqlite3
 import subprocess
-from pathlib import Path
 
 
-APPLE_EPOCH_OFFSET = 978307200
 RECORD_SEP = chr(30)
 FIELD_SEP = chr(31)
 
 
 def preferred_email():
     return (os.environ.get("MIT_EMAIL_ADDRESS") or "").strip().lower()
-
-
-def candidate_db_paths():
-    root = Path.home() / "Library" / "Mail"
-    direct = root / "V10" / "MailData" / "Envelope Index"
-    candidates = []
-    if direct.exists():
-        candidates.append(direct)
-    if root.exists():
-        versioned = sorted(root.glob("V*/MailData/Envelope Index"))
-        for path in versioned:
-            if path not in candidates:
-                candidates.append(path)
-    return list(reversed(candidates))
-
-
-def db_path():
-    for path in candidate_db_paths():
-        if path.exists():
-            return path
-    return Path.home() / "Library" / "Mail" / "V10" / "MailData" / "Envelope Index"
-
-
-def connect_db():
-    path = db_path()
-    if not path.exists():
-        checked = ", ".join(str(p) for p in candidate_db_paths()) or str(path)
-        raise FileNotFoundError(f"Apple Mail database not found. Checked: {checked}")
-    uri = f"file:{path}?mode=ro"
-    conn = sqlite3.connect(uri, uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def run_osascript(script):
@@ -170,96 +135,6 @@ return outText
     return rows
 
 
-def mailbox_rows_db(conn):
-    return conn.execute(
-        """
-        select rowid, url, total_count, unread_count, source
-        from mailboxes
-        order by rowid
-        """
-    ).fetchall()
-
-
-def default_mailbox_filter_db(rows):
-    preferred = []
-    for row in rows:
-        url = (row["url"] or "").lower()
-        if "inbox" in url and not url.startswith("local://"):
-            preferred.append(row["rowid"])
-    return preferred
-
-
-def list_mailboxes_db():
-    conn = connect_db()
-    rows = mailbox_rows_db(conn)
-    results = []
-    for row in rows:
-        results.append({
-            "rowid": row["rowid"],
-            "url": row["url"],
-            "total_count": row["total_count"],
-            "unread_count": row["unread_count"],
-            "source": row["source"],
-        })
-    return {"backend": "sqlite", "mailboxes": results}
-
-
-def list_messages_db(args):
-    conn = connect_db()
-    rows = mailbox_rows_db(conn)
-    mailbox_ids = default_mailbox_filter_db(rows)
-    if args.mailbox_rowid:
-        mailbox_ids = [args.mailbox_rowid]
-    elif args.mailbox_filter:
-        mailbox_ids = [row["rowid"] for row in rows if args.mailbox_filter.lower() in (row["url"] or "").lower()]
-
-    if not mailbox_ids:
-        raise SystemExit(
-            "No non-local Inbox mailbox found in Apple Mail. Configure the MIT Microsoft 365 account in Apple Mail first."
-        )
-
-    placeholders = ",".join("?" for _ in mailbox_ids)
-    params = list(mailbox_ids)
-    query = f"""
-        select
-          m.ROWID as rowid,
-          m.mailbox as mailbox_rowid,
-          mb.url as mailbox_url,
-          a.address as sender_address,
-          a.comment as sender_name,
-          s.subject as subject,
-          m.summary as summary_id,
-          m.read as is_read,
-          m.flagged as flagged,
-          m.deleted as deleted,
-          datetime(m.date_received + {APPLE_EPOCH_OFFSET}, 'unixepoch', 'localtime') as received_local
-        from messages m
-        join mailboxes mb on mb.ROWID = m.mailbox
-        left join addresses a on a.ROWID = m.sender
-        left join subjects s on s.ROWID = m.subject
-        where m.mailbox in ({placeholders}) and m.deleted = 0
-        order by m.date_received desc
-        limit ?
-    """
-    params.append(args.limit)
-    results = []
-    for row in conn.execute(query, params):
-        sender = row["sender_name"] or row["sender_address"]
-        if row["sender_name"] and row["sender_address"]:
-            sender = f'{row["sender_name"]} <{row["sender_address"]}>'
-        results.append({
-            "rowid": row["rowid"],
-            "mailbox_rowid": row["mailbox_rowid"],
-            "mailbox_url": row["mailbox_url"],
-            "sender": sender,
-            "subject": row["subject"],
-            "received_local": row["received_local"],
-            "is_read": bool(row["is_read"]),
-            "flagged": bool(row["flagged"]),
-        })
-    return {"backend": "sqlite", "messages": results}
-
-
 def list_mailboxes_applescript():
     account = select_preferred_account(mail_accounts())
     return {"backend": "applescript", "account": account, "mailboxes": apple_mailboxes(account["name"])}
@@ -295,46 +170,13 @@ def list_messages_applescript(args):
     return {"backend": "applescript", "account": account, "messages": results}
 
 
-def is_authorization_error(exc):
-    msg = str(exc).lower()
-    return "authorization denied" in msg or "operation not permitted" in msg
-
-
-def should_fallback_to_applescript(exc):
-    if is_authorization_error(exc):
-        return True
-    if isinstance(exc, (sqlite3.Error, OSError, FileNotFoundError)):
-        return True
-    msg = str(exc).lower()
-    markers = [
-        "unable to open database file",
-        "readonly database",
-        "no such table",
-        "database disk image is malformed",
-        "database is locked",
-    ]
-    return any(marker in msg for marker in markers)
-
-
 def list_mailboxes(args):
-    try:
-        result = list_mailboxes_db()
-    except Exception as exc:
-        if not should_fallback_to_applescript(exc):
-            raise
-        result = list_mailboxes_applescript()
-        result["fallback_reason"] = str(exc)
+    result = list_mailboxes_applescript()
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
 def list_messages(args):
-    try:
-        result = list_messages_db(args)
-    except Exception as exc:
-        if not should_fallback_to_applescript(exc):
-            raise
-        result = list_messages_applescript(args)
-        result["fallback_reason"] = str(exc)
+    result = list_messages_applescript(args)
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 

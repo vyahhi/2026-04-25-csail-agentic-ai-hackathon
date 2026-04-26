@@ -322,9 +322,7 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 If Mail.app is not configured with the MIT Microsoft 365 account yet, the helper exits cleanly and tells Hermes to configure Mail first.
 
 On this Mac mini, treat Apple Mail access as the Mail-app-backed helper path.
-Do not rely on direct SQLite mailbox reads as an operational capability; the
-helper may try them internally, but the supported live path is the Mail app
-itself.
+The supported live path is the Mail app itself.
 
 The repo also installs a unified MIT assistant health helper:
 
