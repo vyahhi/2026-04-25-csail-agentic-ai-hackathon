@@ -235,6 +235,18 @@ def check_piazza():
     return {"ok": result["ok"], "detail": detail, "visible_classes": classes}
 
 
+def summary_detail(item):
+    detail = (item.get("detail") or "").strip()
+    if not detail:
+        return ""
+    first = detail.splitlines()[0].strip()
+    if first in {"{", "[", "}", "]"}:
+        return ""
+    if first.startswith("{") or first.startswith("["):
+        return ""
+    return first
+
+
 def render_summary(snapshot):
     lines = ["MIT assistant status"]
     order = [
@@ -251,7 +263,7 @@ def render_summary(snapshot):
         item = snapshot.get(key, {})
         ok = bool(item.get("ok"))
         icon = "OK" if ok else "WARN"
-        detail = (item.get("detail") or "").strip().splitlines()[0] if item.get("detail") else ""
+        detail = summary_detail(item)
         extra = []
         if key == "canvas" and item.get("sample_course"):
             extra.append(f"course={item['sample_course']}")
