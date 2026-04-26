@@ -109,6 +109,7 @@ ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
 - Results can include people whose given name merely starts with the query string unless you filter more tightly in post-processing.
 - For a user request like "list all FirstName", prefer post-processing to keep only names beginning with `FirstName`, and exclude `LongerFirstName*`, `LongerFirstNamea*`, `LongerFirstName*`, etc. unless the user asked for prefix matches.
 - `directory.mit.edu` itself may time out on ports 80 and 443 from this machine; that is not proof the MIT directory is unavailable, only that the website path is unreliable here.
+- Some MIT addresses in email headers use subdomain aliases such as `user@csail.mit.edu` or `user@media.mit.edu` while the public LDAP `mail` attribute may only expose `user@mit.edu`. If an exact `(mail=...)` lookup fails for a MIT-looking address, retry by UID using the local part before the `@`, for example `lauralyn@csail.mit.edu` to `(uid=lauralyn)`.
 
 ## Response style
 
