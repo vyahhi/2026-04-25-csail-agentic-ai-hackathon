@@ -78,6 +78,6 @@ Expected important checks:
 OpenAI Codex auth: logged in
 codex CLI: installed
 ripgrep (rg): installed
-Default model: gpt-5.4
+Default model: gpt-5.5
 Provider: openai-codex
 ```

@@ -25,7 +25,7 @@ set +a
 SSH_USER="${MAC_MINI_SSH_USER:?MAC_MINI_SSH_USER is required}"
 SSH_HOST="${MAC_MINI_TAILSCALE_DNS:-${MAC_MINI_TAILSCALE_HOST:?MAC_MINI_TAILSCALE_HOST is required}}"
 SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
-HERMES_MODEL="${HERMES_MODEL:-gpt-5.4}"
+HERMES_MODEL="${HERMES_MODEL:-gpt-5.5}"
 
 if ! command -v expect >/dev/null 2>&1; then
   echo "This script requires expect for password-based SSH automation." >&2
@@ -108,8 +108,8 @@ python3 - <<'PY'
 from pathlib import Path
 path = Path.home() / '.hermes' / 'config.yaml'
 text = path.read_text()
-text = text.replace('default: \"anthropic/claude-opus-4.6\"', 'default: \"gpt-5.4\"')
-text = text.replace('default: \"gpt-5.5\"', 'default: \"gpt-5.4\"')
+text = text.replace('default: \"anthropic/claude-opus-4.6\"', 'default: \"gpt-5.5\"')
+text = text.replace('default: \"gpt-5.4\"', 'default: \"gpt-5.5\"')
 text = text.replace('provider: \"auto\"', 'provider: \"openai-codex\"')
 text = text.replace('base_url: \"https://openrouter.ai/api/v1\"', 'base_url: \"https://chatgpt.com/backend-api/codex\"')
 path.write_text(text)

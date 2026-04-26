@@ -43,7 +43,7 @@ The image-generation/editing tool model is:
 
 The orchestration/reasoning model in the example workflow is:
 
-- **`gpt-5.4`**
+- **`gpt-5.5`**
 
 ## Preconditions
 
@@ -103,7 +103,7 @@ client = openai.OpenAI(
 
 image_b64_out = None
 with client.responses.stream(
-    model='gpt-5.4',
+    model='gpt-5.5',
     store=False,
     instructions='You must fulfill image-generation requests by using the image_generation tool.',
     input=[{
@@ -189,7 +189,7 @@ client = openai.OpenAI(
 
 image_b64_out = None
 with client.responses.stream(
-    model='gpt-5.4',
+    model='gpt-5.5',
     store=False,
     instructions='You must fulfill image editing requests by using the image_generation tool when provided an input image.',
     input=[{

@@ -4,25 +4,23 @@ Built at the [CSAIL Agentic AI Hackathon](https://www.csail.mit.edu/event/agenti
 
 Deployment and operations repo for Tim, a personal AI assistant for the MIT community.
 
-This repo manages the Hermes harness setup only. It does not manage any separate remote OpenClaw installation.
-
 ## Repo Layout
 
 ```text
 scripts/  deployment and configuration entrypoints
 hermes/   files synced into ~/.hermes on the Mac mini
 docs/     setup, integration, and operations detail
-index.html  landing page (deployed at vyahhi.github.io/tim/)
+landing/  landing page source
 ```
 
-## Verified Target
+## Configuration Target
 
 ```text
 Tailscale DNS: set in local .env as MAC_MINI_TAILSCALE_DNS
 SSH user: set in local .env as MAC_MINI_SSH_USER
 Hermes: v0.11.0
 Provider: openai-codex
-Default model: gpt-5.4
+Repo default model: gpt-5.5
 ```
 
 ## Quick Start
@@ -67,23 +65,12 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
   '~/.local/bin/hermes cron list'
 ```
 
-## Landing Page
-
-Live at **https://vyahhi.github.io/tim/**
-
-Source: `index.html` in this repo. To update the deployed page after editing `index.html`:
-
-```bash
-git clone https://github.com/vyahhi/vyahhi.github.io.git /tmp/vyahhi.github.io
-cp index.html /tmp/vyahhi.github.io/tim/
-cd /tmp/vyahhi.github.io && git add tim/index.html && git commit -m "Update Tim landing page" && git push
-```
-
 ## Docs
 
 - [Setup](docs/setup.md)
 - [Integrations](docs/integrations.md)
 - [Operations](docs/operations.md)
+- [Landing page](docs/landing-page.md)
 
 ## Notes
 
