@@ -78,32 +78,43 @@ run_remote() {
 EXPECT_EOF
 }
 
-shell_quote() {
-  python3 -c 'import shlex,sys; print(shlex.quote(sys.argv[1]))' "$1"
+b64() {
+  printf '%s' "${1:-}" | base64 | tr -d '\n'
 }
 
-REMOTE_PROMPT="$(shell_quote "$PROMPT")"
-REMOTE_NAME="$(shell_quote "$JOB_NAME")"
-REMOTE_SCHEDULE="$(shell_quote "$SCHEDULE")"
-REMOTE_DELIVER="$(shell_quote "$DELIVER")"
-REMOTE_WORKDIR="$(shell_quote "$WORKDIR")"
+REMOTE_PROMPT_B64="$(b64 "$PROMPT")"
+REMOTE_NAME_B64="$(b64 "$JOB_NAME")"
+REMOTE_SCHEDULE_B64="$(b64 "$SCHEDULE")"
+REMOTE_DELIVER_B64="$(b64 "$DELIVER")"
+REMOTE_WORKDIR_B64="$(b64 "$WORKDIR")"
 
 remote_cmd="$(cat <<REMOTE_CMD
+JOB_NAME_B64='${REMOTE_NAME_B64}' \
+SCHEDULE_B64='${REMOTE_SCHEDULE_B64}' \
+DELIVER_B64='${REMOTE_DELIVER_B64}' \
+WORKDIR_B64='${REMOTE_WORKDIR_B64}' \
+PROMPT_B64='${REMOTE_PROMPT_B64}' \
 python3 - <<'PY'
+import base64
+import os
 import re
+import shlex
 import subprocess
 
-name = ${REMOTE_NAME}
-schedule = ${REMOTE_SCHEDULE}
-deliver = ${REMOTE_DELIVER}
-workdir = ${REMOTE_WORKDIR}
-prompt = ${REMOTE_PROMPT}
+def dec(key: str) -> str:
+    return base64.b64decode(os.environ[key]).decode()
+
+name = dec("JOB_NAME_B64")
+schedule = dec("SCHEDULE_B64")
+deliver = dec("DELIVER_B64")
+workdir = dec("WORKDIR_B64")
+prompt = dec("PROMPT_B64")
 
 def clean(text: str) -> str:
     return re.sub(r'\\x1b\\[[0-9;]*m', '', text)
 
 listed = subprocess.run(
-    ['~/.local/bin/hermes', 'cron', 'list'],
+    '~/.local/bin/hermes cron list',
     shell=True,
     check=True,
     capture_output=True,
@@ -113,28 +124,29 @@ for line in clean(listed).splitlines():
     if name in line:
         job_id = line.strip().split()[0]
         subprocess.run(
-            ['~/.local/bin/hermes', 'cron', 'remove', job_id],
+            f'~/.local/bin/hermes cron remove {job_id}',
             shell=True,
             check=True,
         )
 
 subprocess.run(
-    [
-        '~/.local/bin/hermes', 'cron', 'create',
-        schedule,
-        prompt,
-        '--name', name,
-        '--deliver', deliver,
-        '--skill', 'mit-email',
-        '--skill', 'piazza',
-        '--skill', 'mit-status',
-        '--skill', 'mit-canvas-course',
-        '--workdir', workdir,
-    ],
+    " ".join([
+        shlex.quote("~/.local/bin/hermes"),
+        "cron", "create",
+        shlex.quote(schedule),
+        shlex.quote(prompt),
+        "--name", shlex.quote(name),
+        "--deliver", shlex.quote(deliver),
+        "--skill", "mit-email",
+        "--skill", "piazza",
+        "--skill", "mit-status",
+        "--skill", "mit-canvas-course",
+        "--workdir", shlex.quote(workdir),
+    ]),
     shell=True,
     check=True,
 )
-subprocess.run(['~/.local/bin/hermes', 'cron', 'list'], shell=True, check=True)
+subprocess.run('~/.local/bin/hermes cron list', shell=True, check=True)
 PY
 REMOTE_CMD
 )"
