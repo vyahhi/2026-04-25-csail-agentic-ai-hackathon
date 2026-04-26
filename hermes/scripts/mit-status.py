@@ -37,6 +37,16 @@ def run(cmd, timeout=20):
     }
 
 
+def hermes_bin():
+    explicit = os.environ.get("HERMES_BIN", "").strip()
+    if explicit:
+        return explicit
+    local = Path.home() / ".local" / "bin" / "hermes"
+    if local.exists():
+        return str(local)
+    return "hermes"
+
+
 def status_from_run(cmd, timeout=20, detail_from_stdout=True):
     result = run(cmd, timeout=timeout)
     detail = result["stdout"] if detail_from_stdout and result["stdout"] else result["stderr"]
@@ -72,8 +82,7 @@ def check_browser():
 
 
 def check_gateway():
-    hermes = os.environ.get("HERMES_BIN", "hermes")
-    result = run([hermes, "gateway", "status"], timeout=20)
+    result = run([hermes_bin(), "gateway", "status"], timeout=20)
     text = result["stdout"] or result["stderr"]
     ok = result["ok"] and any(token in text.lower() for token in ["running", "loaded"])
     return {"ok": ok, "detail": text}
