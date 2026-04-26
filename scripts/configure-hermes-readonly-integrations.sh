@@ -159,9 +159,12 @@ for key in [
 lines = path.read_text().splitlines() if path.exists() else []
 out = []
 seen = set()
+remove_keys = {"PIAZZA_NETWORK_ID"}
 for line in lines:
     if "=" in line and not line.lstrip().startswith("#"):
         key = line.split("=", 1)[0]
+        if key in remove_keys and key not in values:
+            continue
         if key in values:
             out.append(f"{key}={shlex.quote(values[key])}")
             seen.add(key)
