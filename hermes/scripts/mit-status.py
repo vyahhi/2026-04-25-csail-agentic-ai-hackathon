@@ -78,7 +78,10 @@ def check_browser():
     script = str(Path.home() / ".hermes" / "scripts" / "persistent-browser-cdp.sh")
     if not Path(script).exists():
         return {"ok": False, "detail": "CDP helper not installed"}
-    return status_from_run([script, "status"])
+    result = status_from_run([script, "status"])
+    detail = result["detail"].strip().lower()
+    result["ok"] = result["ok"] and detail.startswith("running ")
+    return result
 
 
 def check_gateway():
