@@ -81,6 +81,17 @@ client = openai.OpenAI(
 
 Despite the helper names containing `codex`, this path is being used here as the already-configured OAuth transport for OpenAI image generation/editing. The user-facing skill name should stay model/task-oriented, not transport-oriented.
 
+## Auth / billing note
+
+On this machine, this workflow uses Hermes' `openai-codex` OAuth path rather than a separate `OPENAI_API_KEY`.
+
+Practical implication:
+
+- it is typically using the existing ChatGPT/Codex subscription/auth path
+- it is not the normal pay-per-call OpenAI API-key flow
+
+However, do not overstate this. Treat it as "likely covered by the existing subscription/auth path, subject to whatever quotas, throttling, or feature limits OpenAI applies." If the user asks whether it is subscription-backed, say that the auth path confirms OAuth-backed ChatGPT/Codex usage, but billing details still ultimately depend on OpenAI account terms.
+
 ## Minimal text-to-image script pattern
 
 Run from the Hermes repo with the repo venv activated.

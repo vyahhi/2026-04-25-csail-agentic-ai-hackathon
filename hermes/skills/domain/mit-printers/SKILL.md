@@ -111,6 +111,36 @@ When that happens, use the live persistent browser session plus `browser_cdp` as
 
 Do not say the job printed successfully until one of the helper flows or the CDP fallback is actually verified.
 
+## Quick Test Page
+
+For a fast printer-path check, generate a tiny one-page PDF locally and submit it through the normal MIT print flow:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from datetime import datetime
+out = Path('/tmp/mit-stata-test-page.pdf')
+c = canvas.Canvas(str(out), pagesize=letter)
+_, height = letter
+c.setFont('Helvetica-Bold', 24)
+c.drawString(72, height-100, 'MIT Printing Test Page')
+c.setFont('Helvetica', 14)
+c.drawString(72, height-140, 'Destination: Stata Center (Building 32 Pharos)')
+c.drawString(72, height-165, f'Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+c.drawString(72, height-190, 'Requested via Telegram assistant workflow.')
+c.rect(72, height-320, 468, 90)
+c.drawString(90, height-270, 'If you can read this page, the print path is working.')
+c.showPage(); c.save()
+print(out)
+PY
+
+~/.hermes/scripts/mit-print-file.sh --file /tmp/mit-stata-test-page.pdf --location "stata"
+```
+
+On this Mac mini, `reportlab` is available to `python3` in `terminal()` but not necessarily inside `execute_code()`'s sandboxed interpreter, so prefer `terminal()` for ad hoc PDF test-page generation.
+
 ## Telegram Attachments
 
 When a user asks from Telegram to print an attached file:
