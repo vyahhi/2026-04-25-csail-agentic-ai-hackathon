@@ -4,344 +4,561 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tim — MIT Personal AI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --red:    #A31F34;
-      --red-dk: #8a1a2b;
-      --gray:   #f4f4f4;
-      --mid:    #666;
-      --dark:   #1a1a1a;
-      --white:  #ffffff;
-      --radius: 12px;
+      --bg:         #08090b;
+      --surface:    #0e0f12;
+      --surface-2:  #141519;
+      --border:     #1c1d22;
+      --border-2:   #26272e;
+      --red:        #a31f34;
+      --red-hi:     #c5243d;
+      --red-dim:    rgba(163,31,52,0.15);
+      --text:       #eeeef0;
+      --text-2:     #9495a0;
+      --text-3:     #55565f;
+      --green:      #34d399;
+      --blue:       #7dd3fc;
+      --yellow:     #fcd34d;
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      color: var(--dark);
-      background: var(--white);
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
+      overflow-x: hidden;
     }
+
+    /* subtle dot-grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* red glow behind hero */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(163,31,52,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes redPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(163,31,52,0.5); }
+      60%       { box-shadow: 0 0 0 10px rgba(163,31,52,0); }
+    }
+
+    .a { animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) both; }
+    .a1 { animation-delay: .05s; }
+    .a2 { animation-delay: .15s; }
+    .a3 { animation-delay: .25s; }
+    .a4 { animation-delay: .35s; }
+    .a5 { animation-delay: .45s; }
+    .a6 { animation-delay: .55s; }
 
     /* ── NAV ── */
     nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 48px;
-      border-bottom: 1px solid #e8e8e8;
-      position: sticky;
-      top: 0;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(8px);
-      z-index: 100;
+      padding: 16px 48px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,9,11,0.88);
+      backdrop-filter: blur(14px);
     }
 
-    .nav-logo {
+    .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: var(--dark);
+      gap: 11px;
       text-decoration: none;
     }
-
-    .nav-logo svg { flex-shrink: 0; }
-
-    nav a.btn-outline {
-      padding: 8px 20px;
-      border: 2px solid var(--red);
-      color: var(--red);
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--red);
       border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: background 0.2s, color 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.15rem;
+      color: #fff;
+      flex-shrink: 0;
     }
-    nav a.btn-outline:hover { background: var(--red); color: var(--white); }
+    .logo-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.06em;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+
+    .nav-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .nav-gh {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 16px;
+      border: 1px solid var(--border-2);
+      border-radius: 6px;
+      color: var(--text-2);
+      font-size: 0.83rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+    }
+    .nav-gh:hover { border-color: var(--red); color: var(--text); }
 
     /* ── HERO ── */
     .hero {
-      display: flex;
-      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       align-items: center;
-      text-align: center;
-      padding: 96px 24px 80px;
-      background: linear-gradient(160deg, #fff 60%, #fdf0f2 100%);
+      gap: 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 88px 48px 96px;
+      min-height: calc(100vh - 65px);
     }
 
-    .hero-badge {
+    .hero-left { padding-right: 64px; }
+
+    .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: #fde8ec;
-      color: var(--red);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 999px;
+      gap: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--red-hi);
+      margin-bottom: 28px;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 22px; height: 1px;
+      background: var(--red-hi);
+    }
+
+    .hero-h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(3rem, 6.5vw, 5.2rem);
+      line-height: 1.08;
+      font-weight: 400;
+      color: var(--text);
       margin-bottom: 24px;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+    }
+    .hero-h1 em { font-style: italic; color: var(--red-hi); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      line-height: 1.75;
+      max-width: 430px;
+      margin-bottom: 40px;
     }
 
-    .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 4rem);
-      font-weight: 800;
-      line-height: 1.15;
-      color: var(--dark);
-      max-width: 760px;
-    }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 60px; }
 
-    .hero h1 span { color: var(--red); }
-
-    .hero p {
-      margin-top: 20px;
-      font-size: 1.15rem;
-      color: var(--mid);
-      max-width: 560px;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 14px;
-      margin-top: 40px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .btn-red {
+      display: inline-flex; align-items: center; gap: 8px;
       background: var(--red);
-      color: var(--white);
-      padding: 14px 30px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1rem;
-      transition: background 0.2s, transform 0.15s;
-      box-shadow: 0 4px 14px rgba(163,31,52,0.25);
-    }
-    .btn-primary:hover { background: var(--red-dk); transform: translateY(-1px); }
-
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--white);
-      color: var(--dark);
-      padding: 14px 30px;
-      border-radius: 10px;
-      text-decoration: none;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 7px;
       font-weight: 600;
-      font-size: 1rem;
-      border: 2px solid #e0e0e0;
-      transition: border-color 0.2s, transform 0.15s;
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+      animation: redPulse 2.5s ease infinite;
     }
-    .btn-secondary:hover { border-color: #aaa; transform: translateY(-1px); }
+    .btn-red:hover { background: var(--red-hi); transform: translateY(-1px); animation: none; }
 
-    /* ── HOW IT WORKS ── */
-    .how {
-      background: var(--gray);
-      padding: 80px 24px;
-      text-align: center;
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent;
+      color: var(--text-2);
+      padding: 12px 24px;
+      border-radius: 7px;
+      font-weight: 500;
+      font-size: 0.88rem;
+      text-decoration: none;
+      border: 1px solid var(--border-2);
+      transition: border-color .2s, color .2s;
     }
+    .btn-ghost:hover { border-color: var(--text-3); color: var(--text); }
 
-    .section-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+    .hero-stats { display: flex; gap: 44px; flex-wrap: wrap; }
+    .stat-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-lbl {
+      font-size: 0.72rem;
+      color: var(--text-3);
       text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 10px;
+      letter-spacing: 0.08em;
     }
 
-    .section-title {
-      font-size: clamp(1.6rem, 4vw, 2.2rem);
-      font-weight: 800;
-      color: var(--dark);
+    /* ── CHAT CARD ── */
+    .hero-right {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 40px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(163,31,52,0.06);
+    }
+
+    .chat-head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .chat-avatar {
+      width: 32px; height: 32px;
+      background: var(--red);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .chat-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .chat-status {
+      font-size: 0.68rem;
+      color: var(--green);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .chat-status::before {
+      content: '';
+      display: block;
+      width: 5px; height: 5px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+    .chat-platform {
+      margin-left: auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-3);
+    }
+
+    .chat-body {
+      padding: 18px 14px;
+      display: flex; flex-direction: column; gap: 12px;
+      min-height: 300px;
+    }
+
+    .msg { display: flex; flex-direction: column; gap: 3px; }
+    .msg.u { align-items: flex-end; }
+    .msg.t { align-items: flex-start; }
+
+    .bubble {
+      max-width: 88%;
+      padding: 9px 13px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+    .msg.u .bubble {
+      background: var(--red-dim);
+      border: 1px solid rgba(163,31,52,0.25);
+      color: #ecc0c8;
+      border-bottom-right-radius: 3px;
+    }
+    .msg.t .bubble {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 3px;
+    }
+    .ts {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-3);
+    }
+    .hi  { color: var(--yellow); }
+    .ok  { color: var(--green); }
+    .cur {
+      display: inline-block;
+      width: 6px; height: 11px;
+      background: var(--text-2);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    /* staggered chat animation */
+    .m1 { opacity: 0; animation: msgIn .4s ease .7s both; }
+    .m2 { opacity: 0; animation: msgIn .4s ease 1.5s both; }
+    .m3 { opacity: 0; animation: msgIn .4s ease 2.6s both; }
+    .m4 { opacity: 0; animation: msgIn .4s ease 3.7s both; }
+    .m5 { opacity: 0; animation: msgIn .4s ease 5s   both; }
+
+    /* ── DIVIDER ── */
+    .div {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 48px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── SECTION SHELL ── */
+    .sec {
+      position: relative; z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 96px 48px;
+    }
+
+    .sec-tag {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--red-hi);
       margin-bottom: 14px;
     }
-
-    .section-sub {
-      font-size: 1.05rem;
-      color: var(--mid);
-      max-width: 520px;
-      margin: 0 auto 48px;
+    .sec-tag::before {
+      content: '';
+      display: block;
+      width: 16px; height: 1px;
+      background: var(--red-hi);
     }
 
-    .steps {
-      display: flex;
-      gap: 28px;
-      justify-content: center;
-      flex-wrap: wrap;
-      max-width: 900px;
-      margin: 0 auto;
+    .sec-h2 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .sec-sub {
+      font-size: 0.97rem;
+      color: var(--text-2);
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    .sec-head { margin-bottom: 52px; }
+
+    /* ── FEATURE GRID ── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .feat {
+      background: var(--surface);
+      padding: 32px 28px;
+      position: relative;
+      transition: background .2s;
+      overflow: hidden;
+    }
+    .feat::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--red);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .feat:hover { background: var(--surface-2); }
+    .feat:hover::before { transform: scaleX(1); }
+
+    .feat-icon { font-size: 1.6rem; margin-bottom: 16px; display: block; }
+    .feat-title { font-size: 0.92rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .feat-desc  { font-size: 0.82rem; color: var(--text-2); line-height: 1.65; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
     }
 
     .step {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 32px 28px;
-      flex: 1 1 220px;
-      max-width: 260px;
-      text-align: left;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      position: relative;
+      padding-left: 22px;
+      border-left: 2px solid var(--border);
+      transition: border-color .25s;
     }
+    .step:hover { border-left-color: var(--red); }
 
-    .step-num {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--red);
-      color: var(--white);
-      font-weight: 800;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
+    .step-n {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--red-hi);
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
     }
-
-    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-    .step p  { font-size: 0.88rem; color: var(--mid); }
-
-    /* ── FEATURES ── */
-    .features {
-      padding: 80px 24px;
-      text-align: center;
+    .step-h {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 10px;
     }
+    .step-p { font-size: 0.85rem; color: var(--text-2); line-height: 1.7; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-      max-width: 1040px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: var(--white);
-      border: 1.5px solid #ececec;
-      border-radius: var(--radius);
-      padding: 32px 28px;
-      text-align: left;
-      transition: box-shadow 0.2s, transform 0.2s;
-    }
-    .card:hover {
-      box-shadow: 0 8px 28px rgba(0,0,0,0.09);
-      transform: translateY(-2px);
-    }
-
-    .card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: #fde8ec;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 18px;
-    }
-
-    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-    .card p  { font-size: 0.88rem; color: var(--mid); line-height: 1.55; }
-
-    /* ── DEMO SNIPPET ── */
-    .demo {
-      background: var(--dark);
-      padding: 80px 24px;
-      text-align: center;
-    }
-
-    .demo .section-title { color: var(--white); }
-    .demo .section-sub   { color: #aaa; }
-
+    /* ── TERMINAL DEMO ── */
     .terminal {
-      background: #111;
-      border-radius: var(--radius);
-      max-width: 580px;
-      margin: 0 auto;
-      text-align: left;
+      background: #020205;
+      border: 1px solid var(--border);
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
     }
 
-    .terminal-bar {
-      background: #2a2a2a;
-      padding: 10px 16px;
-      display: flex;
-      gap: 7px;
-      align-items: center;
+    .term-bar {
+      background: var(--surface-2);
+      padding: 11px 16px;
+      display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .td { width: 11px; height: 11px; border-radius: 50%; }
+    .td-r { background: #ff5f57; }
+    .td-y { background: #febc2e; }
+    .td-g { background: #28c840; }
+    .term-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-3);
+      margin: 0 auto;
     }
 
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: #ff5f57; }
-    .dot-y { background: #febc2e; }
-    .dot-g { background: #28c840; }
-
-    .terminal-title {
-      font-size: 0.75rem;
-      color: #888;
-      margin-left: auto;
-      margin-right: auto;
-      font-family: monospace;
+    .term-body {
+      padding: 28px 32px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 2;
     }
-
-    .terminal-body {
-      padding: 24px 28px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 0.85rem;
-      line-height: 1.8;
-    }
-
-    .t-user  { color: #82c3f8; }
-    .t-hermes { color: #6ee7b7; }
-    .t-dim   { color: #666; }
-    .t-white { color: #e8e8e8; }
+    .tp  { color: var(--text-3); }
+    .tu  { color: var(--blue); }
+    .tt  { color: var(--green); }
+    .to  { color: var(--text); }
+    .ty  { color: var(--yellow); }
+    .td2 { color: var(--text-3); }
+    .tc  { animation: blink 1s step-end infinite; }
 
     /* ── FOOTER ── */
     footer {
-      background: var(--gray);
-      border-top: 1px solid #e0e0e0;
-      padding: 40px 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: gap;
-      gap: 16px;
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 36px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
     }
 
-    footer .footer-logo {
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--dark);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .foot-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .foot-mark {
+      width: 28px; height: 28px;
+      background: var(--red);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 1rem; color: #fff;
+    }
+    .foot-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text-2);
     }
 
-    footer p {
-      font-size: 0.85rem;
-      color: var(--mid);
-    }
+    footer p { font-size: 0.8rem; color: var(--text-3); }
+    footer a { color: var(--text-3); text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--red-hi); }
 
-    footer a {
-      color: var(--red);
-      text-decoration: none;
-    }
-    footer a:hover { text-decoration: underline; }
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 14px 20px; }
+      .nav-tag { display: none; }
 
-    @media (max-width: 600px) {
-      nav { padding: 16px 20px; }
-      .hero { padding: 64px 20px 60px; }
-      footer { flex-direction: column; text-align: center; padding: 32px 20px; }
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 56px 20px 72px;
+        min-height: auto;
+        gap: 56px;
+      }
+      .hero-left { padding-right: 0; }
+
+      .sec { padding: 72px 20px; }
+      .div { margin: 0 20px; }
+
+      .feat-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; gap: 32px; }
+
+      .term-body { padding: 20px; font-size: 0.75rem; }
+      footer { padding: 28px 20px; flex-direction: column; text-align: center; }
     }
   </style>
 </head>
@@ -349,153 +566,239 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="28" height="28" rx="7" fill="#A31F34"/>
-      <path d="M7 8h3v5h8V8h3v12h-3v-5H10v5H7V8z" fill="white"/>
-    </svg>
-    Tim
+  <a href="#" class="logo">
+    <div class="logo-mark">T</div>
+    <span class="logo-name">tim</span>
   </a>
-  <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="btn-outline" target="_blank" rel="noopener">View on GitHub</a>
+  <div class="nav-right">
+    <span class="nav-tag">CSAIL Hackathon · 2026</span>
+    <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="nav-gh" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      GitHub
+    </a>
+  </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-badge">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#A31F34" stroke-width="1.5"/><path d="M6 4v2.5L7.5 8" stroke="#A31F34" stroke-width="1.5" stroke-linecap="round"/></svg>
-    CSAIL Agentic AI Hackathon · 2026
-  </div>
-  <h1>Your MIT life,<br><span>handled.</span></h1>
-  <p>Tim is an AI assistant that runs on your Mac or in the cloud and handles MIT-specific tasks — courses, email, printing — right from your favorite chat app.</p>
-  <div class="hero-cta">
-    <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="btn-primary" target="_blank" rel="noopener">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-      View on GitHub
-    </a>
-    <a href="#features" class="btn-secondary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-      See Features
-    </a>
-  </div>
-</section>
+<div class="hero">
 
-<!-- HOW IT WORKS -->
-<section class="how">
-  <p class="section-label">How it works</p>
-  <h2 class="section-title">Simple setup, powerful results</h2>
-  <p class="section-sub">Tim runs on your Mac or a cloud server, wired into your MIT accounts — and answers wherever you are.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Deploy anywhere</h3>
-      <p>One script provisions Tim on your Mac or a cloud server with all MIT integrations wired up automatically.</p>
+  <div class="hero-left">
+    <div class="eyebrow a a1">MIT Personal AI Assistant</div>
+
+    <h1 class="hero-h1 a a2">
+      Your MIT life,<br><em>handled.</em>
+    </h1>
+
+    <p class="hero-sub a a3">
+      Tim is an agentic AI assistant wired deep into MIT's systems — Canvas, email, printers, VPN — and answers from any chat app, anywhere, any time.
+    </p>
+
+    <div class="hero-cta a a4">
+      <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="btn-red" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#features" class="btn-ghost">Explore features ↓</a>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>Connect your MIT accounts</h3>
-      <p>Link Canvas, email, and Piazza once. Tim uses a persistent browser session to handle MIT SSO and Duo seamlessly.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Chat on Telegram</h3>
-      <p>Message from anywhere via Telegram, Discord, WhatsApp, and more. Tim reads your courses, checks your email, queues print jobs — all in plain language.</p>
+
+    <div class="hero-stats a a5">
+      <div>
+        <div class="stat-num">9</div>
+        <div class="stat-lbl">MIT integrations</div>
+      </div>
+      <div>
+        <div class="stat-num">∞</div>
+        <div class="stat-lbl">Chat platforms</div>
+      </div>
+      <div>
+        <div class="stat-num">24/7</div>
+        <div class="stat-lbl">Always on</div>
+      </div>
     </div>
   </div>
-</section>
+
+  <!-- Live chat demo -->
+  <div class="hero-right a a3">
+    <div class="chat-card">
+      <div class="chat-head">
+        <div class="chat-avatar">T</div>
+        <div>
+          <div class="chat-name">Tim</div>
+          <div class="chat-status">online</div>
+        </div>
+        <span class="chat-platform">Telegram</span>
+      </div>
+      <div class="chat-body">
+
+        <div class="msg u m1">
+          <div class="bubble">What's due this week in 6.824?</div>
+          <span class="ts">10:42</span>
+        </div>
+
+        <div class="msg t m2">
+          <div class="bubble">
+            Found <span class="hi">2 items</span> in 6.824 (Distributed Systems):<br>
+            &bull; Lab 2B &nbsp;&mdash; due <span class="ok">Thu 23:59</span><br>
+            &bull; Reading response &mdash; due Fri 12:00
+          </div>
+          <span class="ts">10:42</span>
+        </div>
+
+        <div class="msg u m3">
+          <div class="bubble">Print my resume to nearest CSAIL printer</div>
+          <span class="ts">10:44</span>
+        </div>
+
+        <div class="msg t m4">
+          <div class="bubble">
+            Sent <span class="hi">resume.pdf</span> &rarr; <span class="ok">G882-printer</span> via MobilePrint.<br>
+            Ready in ~2 min ✓
+          </div>
+          <span class="ts">10:44</span>
+        </div>
+
+        <div class="msg u m5">
+          <div class="bubble">Summarize my unread emails<span class="cur">▌</span></div>
+          <span class="ts">10:45</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="div"></div>
 
 <!-- FEATURES -->
-<section class="features" id="features">
-  <p class="section-label">Features</p>
-  <h2 class="section-title">Built for life at MIT</h2>
-  <p class="section-sub">Every integration is tailored to MIT's specific systems — not generic wrappers.</p>
-  <div class="grid">
-    <div class="card">
-      <div class="card-icon">📚</div>
-      <h3>Canvas &amp; Piazza</h3>
-      <p>Instantly surface assignments, announcements, and discussion posts from your active courses — no portal hunting.</p>
+<section class="sec" id="features">
+  <div class="sec-head a a1">
+    <div class="sec-tag">Capabilities</div>
+    <h2 class="sec-h2">Built for life at MIT</h2>
+    <p class="sec-sub">Every integration is native to MIT's own systems — not generic wrappers bolted on after the fact.</p>
+  </div>
+
+  <div class="feat-grid">
+    <div class="feat a a1">
+      <span class="feat-icon">📚</span>
+      <div class="feat-title">Canvas &amp; Piazza</div>
+      <p class="feat-desc">Surface assignments, announcements, and discussion posts from your active courses — no portal hunting.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">✉️</div>
-      <h3>MIT Email</h3>
-      <p>Check and summarize your inbox via Apple Mail or Outlook, without leaving the Telegram conversation.</p>
+    <div class="feat a a2">
+      <span class="feat-icon">✉️</span>
+      <div class="feat-title">MIT Email</div>
+      <p class="feat-desc">Check and summarize your inbox via Apple Mail or Outlook, without leaving your chat app.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">🖨️</div>
-      <h3>MIT Printing</h3>
-      <p>Send files to MobilePrint or a configured Pharos queue. Finds available printers dynamically across campus.</p>
+    <div class="feat a a3">
+      <span class="feat-icon">🖨️</span>
+      <div class="feat-title">MIT Printing</div>
+      <p class="feat-desc">Send files to MobilePrint or a Pharos queue. Finds available printers dynamically across campus.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">🔒</div>
-      <h3>VPN &amp; SSO</h3>
-      <p>GlobalProtect VPN managed automatically. MIT SSO sessions reused so you skip repeated Touchstone and Duo prompts.</p>
+    <div class="feat a a4">
+      <span class="feat-icon">🔒</span>
+      <div class="feat-title">VPN &amp; SSO</div>
+      <p class="feat-desc">GlobalProtect VPN managed automatically. MIT SSO sessions reused — skip Touchstone and Duo prompts.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">🧠</div>
-      <h3>Persistent Memory</h3>
-      <p>Tim remembers your preferences, habits, and past interactions — building a personal profile that makes every conversation sharper over time.</p>
+    <div class="feat a a5">
+      <span class="feat-icon">🧠</span>
+      <div class="feat-title">Persistent Memory</div>
+      <p class="feat-desc">Tim remembers your preferences and past interactions — building a profile that makes every conversation sharper.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">🌐</div>
-      <h3>Autonomous Browsing</h3>
-      <p>Tim navigates websites on your behalf using a live browser session — logging in, filling forms, extracting data — without you touching a keyboard.</p>
+    <div class="feat a a6">
+      <span class="feat-icon">🌐</span>
+      <div class="feat-title">Autonomous Browsing</div>
+      <p class="feat-desc">Tim navigates websites on your behalf — logging in, filling forms, extracting data — without you touching a keyboard.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">🔬</div>
-      <h3>Multimodal Understanding</h3>
-      <p>Send a photo, screenshot, or PDF. Tim reads figures, summarizes papers, extracts data from slides, and answers questions about what it sees.</p>
+    <div class="feat a a1">
+      <span class="feat-icon">🔬</span>
+      <div class="feat-title">Multimodal Understanding</div>
+      <p class="feat-desc">Send a photo, screenshot, or PDF. Tim reads figures, summarizes papers, and answers questions about what it sees.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">⏰</div>
-      <h3>Scheduled Tasks</h3>
-      <p>Set automations that run on a schedule and take real action — not just notifications. Daily briefing: email + Canvas + Piazza digest every morning before you open a browser.</p>
+    <div class="feat a a2">
+      <span class="feat-icon">⏰</span>
+      <div class="feat-title">Scheduled Tasks</div>
+      <p class="feat-desc">Set automations that take real action on a schedule — daily briefing combining email, Canvas, and Piazza every morning.</p>
     </div>
-    <div class="card">
-      <div class="card-icon">💬</div>
-      <h3>Chat from anywhere</h3>
-      <p>Ask anything via Telegram, Discord, WhatsApp, and more. Tim queues long-running tasks and delivers results when ready, on any device.</p>
+    <div class="feat a a3">
+      <span class="feat-icon">💬</span>
+      <div class="feat-title">Any Chat App</div>
+      <p class="feat-desc">Telegram, Discord, WhatsApp, and more. Long tasks queue and deliver when ready, on any device.</p>
     </div>
   </div>
 </section>
 
-<!-- DEMO -->
-<section class="demo">
-  <p class="section-label" style="color:#888">See it in action</p>
-  <h2 class="section-title">Plain language. Real results.</h2>
-  <p class="section-sub" style="margin-bottom:40px">Ask in natural language. Tim figures out which MIT system to call and gets it done.</p>
-  <div class="terminal">
-    <div class="terminal-bar">
-      <span class="dot dot-r"></span>
-      <span class="dot dot-y"></span>
-      <span class="dot dot-g"></span>
-      <span class="terminal-title">Chat → Tim</span>
+<div class="div"></div>
+
+<!-- HOW IT WORKS -->
+<section class="sec">
+  <div class="sec-head a a1">
+    <div class="sec-tag">Setup</div>
+    <h2 class="sec-h2">Three steps to done</h2>
+    <p class="sec-sub">From zero to a fully wired MIT assistant in one sitting.</p>
+  </div>
+
+  <div class="steps-grid">
+    <div class="step a a2">
+      <div class="step-n">01 —</div>
+      <h3 class="step-h">Deploy anywhere</h3>
+      <p class="step-p">One script provisions Tim on your Mac or a cloud server with all MIT integrations wired up automatically.</p>
     </div>
-    <div class="terminal-body">
-      <div><span class="t-user">You</span> <span class="t-dim">10:42</span></div>
-      <div class="t-white">What's due this week in 6.824?</div>
+    <div class="step a a3">
+      <div class="step-n">02 —</div>
+      <h3 class="step-h">Connect your accounts</h3>
+      <p class="step-p">Link Canvas, email, and Piazza once. Tim uses a persistent browser session to handle MIT SSO and Duo seamlessly.</p>
+    </div>
+    <div class="step a a4">
+      <div class="step-n">03 —</div>
+      <h3 class="step-h">Chat from anywhere</h3>
+      <p class="step-p">Message from any device. Tim reads your courses, checks email, queues print jobs — all in plain language.</p>
+    </div>
+  </div>
+</section>
+
+<div class="div"></div>
+
+<!-- DEMO -->
+<section class="sec">
+  <div class="sec-head a a1" style="text-align:center; max-width:520px; margin:0 auto 52px;">
+    <div class="sec-tag" style="justify-content:center;">Demo</div>
+    <h2 class="sec-h2">Plain language. Real results.</h2>
+    <p class="sec-sub" style="margin:0 auto;">Ask in natural language. Tim figures out which MIT system to call and gets it done.</p>
+  </div>
+
+  <div class="terminal a a2">
+    <div class="term-bar">
+      <span class="td td-r"></span>
+      <span class="td td-y"></span>
+      <span class="td td-g"></span>
+      <span class="term-title">Chat → Tim</span>
+    </div>
+    <div class="term-body">
+      <div><span class="tp">you &nbsp;</span> <span class="tu">What's due this week in 6.824?</span></div>
+      <div><span class="tp">tim &nbsp;</span> <span class="tt">Checking Canvas for 6.824...</span></div>
+      <div><span class="tp">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="to">Found 2 items in 6.824 (Distributed Systems):</span></div>
+      <div><span class="tp">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="to">&bull; Lab 2B &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;due <span class="ty">Thu Apr 30 &middot; 23:59</span></span></div>
+      <div><span class="tp">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="to">&bull; Reading response &nbsp;due Fri May 01 &middot; 12:00</span></div>
       <br>
-      <div><span class="t-hermes">Tim</span> <span class="t-dim">10:42</span></div>
-      <div class="t-white">Found 2 items in 6.824 (Distributed Systems):</div>
-      <div class="t-white">• Lab 2B — due Thursday 23:59</div>
-      <div class="t-white">• Reading response — due Friday 12:00</div>
+      <div><span class="tp">you &nbsp;</span> <span class="tu">Print my resume to nearest CSAIL printer</span></div>
+      <div><span class="tp">tim &nbsp;</span> <span class="tt">Finding printers near Stata Center...</span></div>
+      <div><span class="tp">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="to">Sent resume.pdf &rarr; <span class="ty">G882-printer</span> via MobilePrint</span></div>
+      <div><span class="tp">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="to">Estimated ready: ~2 min ✓</span></div>
       <br>
-      <div><span class="t-user">You</span> <span class="t-dim">10:43</span></div>
-      <div class="t-white">Print my resume to the nearest CSAIL printer</div>
-      <br>
-      <div><span class="t-hermes">Tim</span> <span class="t-dim">10:43</span></div>
-      <div class="t-white">Sent resume.pdf to <span style="color:#fcd34d">G882-printer</span> via MobilePrint.</div>
-      <div class="t-white">Estimated ready: ~2 min.</div>
+      <div><span class="tp">you &nbsp;</span> <span class="tu">Any urgent emails I missed?</span></div>
+      <div><span class="tp">tim &nbsp;</span> <span class="tt">Scanning inbox<span class="tc">▌</span></span></div>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#A31F34"/><path d="M7 8h3v5h8V8h3v12h-3v-5H10v5H7V8z" fill="white"/></svg>
-    Tim
-  </div>
-  <p>Built at the <a href="https://www.csail.mit.edu/" target="_blank" rel="noopener">CSAIL</a> Agentic AI Hackathon · April 2026</p>
-  <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" target="_blank" rel="noopener">GitHub →</a>
+  <a href="#" class="foot-logo">
+    <div class="foot-mark">T</div>
+    <span class="foot-name">tim</span>
+  </a>
+  <p>Built at the <a href="https://www.csail.mit.edu/event/agentic-ai-hackathon" target="_blank" rel="noopener">CSAIL Agentic AI Hackathon</a> &middot; April 2026</p>
+  <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" target="_blank" rel="noopener" style="font-size:0.8rem;">GitHub &rarr;</a>
 </footer>
 
 </body>
