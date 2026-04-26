@@ -109,7 +109,7 @@ schedule = dec("SCHEDULE_B64")
 deliver = dec("DELIVER_B64")
 workdir = dec("WORKDIR_B64")
 prompt = dec("PROMPT_B64")
-hermes = "$HOME/.local/bin/hermes"
+hermes = os.path.expanduser("~/.local/bin/hermes")
 
 def clean(text: str) -> str:
     return re.sub(r'\\x1b\\[[0-9;]*m', '', text)
