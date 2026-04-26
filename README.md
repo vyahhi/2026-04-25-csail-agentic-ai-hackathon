@@ -366,6 +366,37 @@ Some Piazza classes use SSO, MFA, or captcha flows that the unofficial API may
 not support. In that case, use browser-provided export/session data instead of
 storing account passwords.
 
+Configure the daily MIT briefing cron:
+
+```bash
+scripts/configure-hermes-cron.sh
+```
+
+Default behavior:
+
+- job name: `mit-daily-briefing`
+- schedule: `0 8 * * *`
+- delivery target: `telegram`
+
+Optional `.env` overrides:
+
+```text
+HERMES_MIT_BRIEFING_NAME=mit-daily-briefing
+HERMES_MIT_BRIEFING_SCHEDULE=0 8 * * *
+HERMES_MIT_BRIEFING_DELIVER=telegram
+HERMES_MIT_BRIEFING_WORKDIR=/absolute/path/to/this/repo
+```
+
+The cron job uses:
+
+- `mit-email`
+- `piazza`
+- `mit-status`
+- `mit-canvas-course`
+
+It replaces any existing remote cron job with the same configured name, then
+creates the new one and prints the current cron list.
+
 ### Verify
 
 ```bash
@@ -428,6 +459,16 @@ scripts/configure-hermes-integrations.sh
 
 That install step is what provisions the `piazza-api` dependency into the Hermes
 venv on the Mac mini.
+
+Cron jobs:
+
+```bash
+set -a; source .env; set +a
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.local/bin/hermes cron list'
+ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
+  '~/.local/bin/hermes cron status'
+```
 
 ### Start Hermes
 
