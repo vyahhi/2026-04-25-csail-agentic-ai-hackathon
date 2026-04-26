@@ -144,6 +144,7 @@ hermes/skills/domain/mit-email/SKILL.md
 hermes/skills/domain/mit-directory/SKILL.md
 hermes/skills/domain/mit-status/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
+hermes/skills/creative/openai-image-gen-or-edit/SKILL.md
 hermes/skills/productivity/simple-pdf-generation/SKILL.md
 hermes/scripts/mit-email-applemail.py
 hermes/scripts/mit-email-browser.py
@@ -165,6 +166,9 @@ is not the primary path on the Mac mini.
 
 `simple-pdf-generation` is kept because Hermes often needs to create short
 PDFs for printing or sharing when heavier conversion tools are unavailable.
+
+`openai-image-gen-or-edit` is kept because it documents the working direct
+OpenAI image generation/editing path through Hermes' existing OAuth transport.
 
 Mail checks:
 

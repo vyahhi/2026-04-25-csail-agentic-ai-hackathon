@@ -27,6 +27,7 @@ FILES=(
   "$REPO_ROOT/hermes/skills/domain/mit-directory/SKILL.md:.hermes/skills/domain/mit-directory/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/mit-status/SKILL.md:.hermes/skills/domain/mit-status/SKILL.md"
   "$REPO_ROOT/hermes/skills/domain/piazza/SKILL.md:.hermes/skills/domain/piazza/SKILL.md"
+  "$REPO_ROOT/hermes/skills/creative/openai-image-gen-or-edit/SKILL.md:.hermes/skills/creative/openai-image-gen-or-edit/SKILL.md"
   "$REPO_ROOT/hermes/skills/productivity/simple-pdf-generation/SKILL.md:.hermes/skills/productivity/simple-pdf-generation/SKILL.md"
   "$REPO_ROOT/hermes/scripts/mit-email-applemail.py:.hermes/scripts/mit-email-applemail.py"
   "$REPO_ROOT/hermes/scripts/mit-email-browser.py:.hermes/scripts/mit-email-browser.py"
@@ -123,7 +124,7 @@ EXPECT_EOF
 }
 
 echo "Configuring Hermes integrations on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email ~/.hermes/skills/domain/mit-directory ~/.hermes/skills/domain/mit-status ~/.hermes/skills/domain/piazza ~/.hermes/skills/productivity/simple-pdf-generation ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
+run_remote "mkdir -p ~/.hermes/skills/email/himalaya/references ~/.hermes/skills/domain/mit-email ~/.hermes/skills/domain/mit-directory ~/.hermes/skills/domain/mit-status ~/.hermes/skills/domain/piazza ~/.hermes/skills/creative/openai-image-gen-or-edit ~/.hermes/skills/productivity/simple-pdf-generation ~/.hermes/scripts ~/.hermes/auth && touch ~/.hermes/.env && chmod 600 ~/.hermes/.env"
 
 for mapping in "${FILES[@]}"; do
   local_path="${mapping%%:*}"
@@ -184,13 +185,13 @@ REMOTE_CMD
 
 run_remote "$remote_env_cmd"
 run_remote "chmod +x ~/.hermes/scripts/mit-email-applemail.py ~/.hermes/scripts/mit-email-browser.py ~/.hermes/scripts/mit-status.py ~/.hermes/scripts/piazza.py && ~/.hermes/scripts/mit-email-applemail.py --help >/dev/null && ~/.hermes/scripts/mit-status.py >/dev/null && ~/.hermes/scripts/piazza.py --help >/dev/null"
-run_remote "rm -rf ~/.hermes/skills/domain/mit-email-readonly && rm -f ~/.hermes/scripts/mit-email-thunderbird.py ~/.hermes/scripts/mit-email-graph.py"
+run_remote "rm -rf ~/.hermes/skills/domain/mit-email-readonly ~/.hermes/skills/creative/openai-image-edit-via-codex && rm -f ~/.hermes/scripts/mit-email-thunderbird.py ~/.hermes/scripts/mit-email-graph.py"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install websocket-client >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; else python3 -m pip install --user websocket-client >/dev/null; python3 ~/.hermes/scripts/mit-email-applemail.py mailboxes >/dev/null 2>&1 || true; python3 ~/.hermes/scripts/mit-email-browser.py list --limit 1 >/dev/null 2>&1 || true; fi"
 
 run_remote "set -e; if [[ -x ~/.hermes/hermes-agent/venv/bin/python ]]; then ~/.hermes/hermes-agent/venv/bin/python -m ensurepip --upgrade >/dev/null; ~/.hermes/hermes-agent/venv/bin/python -m pip install piazza-api >/dev/null; ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/scripts/piazza.py --help >/dev/null; else python3 -m pip install --user piazza-api >/dev/null; python3 ~/.hermes/scripts/piazza.py --help >/dev/null; fi"
 
-run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email|mit-directory|mit-status|piazza|simple-pdf-generation' || true"
+run_remote "export PATH=\"/opt/homebrew/bin:/usr/local/bin:\$HOME/.local/bin:\$PATH\"; hermes skills list | grep -E 'mit-email|mit-directory|mit-status|piazza|openai-image-gen-or-edit|simple-pdf-generation' || true"
 
 echo "Hermes integrations installed."
 echo "MIT email supported paths on this Mac mini are Apple Mail first and Outlook browser-session fallback second."
