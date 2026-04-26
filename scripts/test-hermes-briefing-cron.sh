@@ -36,8 +36,9 @@ listed = subprocess.run(f"{hermes} cron list", shell=True, check=True, capture_o
 clean = re.sub(r'\x1b\[[0-9;]*m', '', listed)
 job_id = None
 for line in clean.splitlines():
-    if name in line:
-        job_id = line.strip().split()[0]
+    m = re.match(r"\s*([a-f0-9]{12})\s+\[active\]", line)
+    if m:
+        job_id = m.group(1)
         break
 if not job_id:
     raise SystemExit(f"Could not find cron job named {name!r}")

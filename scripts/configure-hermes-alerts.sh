@@ -89,11 +89,11 @@ copy_remote() {
 EXPECT_EOF
 }
 
-echo "Configuring degraded MIT alerts on $SSH_USER@$SSH_HOST"
-run_remote "mkdir -p ~/.hermes/scripts ~/.hermes/logs ~/Library/LaunchAgents"
-copy_remote "$REPO_ROOT/hermes/scripts/mit-degraded-alert.py" ".hermes/scripts/mit-degraded-alert.py"
-
-remote_cmd="$(cat <<REMOTE_CMD
+tmp_script="$(mktemp)"
+cat >"$tmp_script" <<REMOTE_SCRIPT
+set -euo pipefail
+install -m 755 /tmp/mit-degraded-alert.py ~/.hermes/scripts/mit-degraded-alert.py
+mkdir -p ~/.hermes/logs ~/Library/LaunchAgents
 python3 - <<'PY'
 from pathlib import Path
 home = Path.home()
@@ -133,10 +133,14 @@ launchctl bootout gui/\$uid ~/Library/LaunchAgents/${PLIST_LABEL}.plist >/dev/nu
 launchctl bootstrap gui/\$uid ~/Library/LaunchAgents/${PLIST_LABEL}.plist
 launchctl kickstart -k gui/\$uid/${PLIST_LABEL}
 launchctl print gui/\$uid/${PLIST_LABEL}
-REMOTE_CMD
-)"
+REMOTE_SCRIPT
 
-run_remote "$remote_cmd"
+echo "Configuring degraded MIT alerts on $SSH_USER@$SSH_HOST"
+run_remote "mkdir -p ~/.hermes/scripts ~/.hermes/logs ~/Library/LaunchAgents"
+copy_remote "$REPO_ROOT/hermes/scripts/mit-degraded-alert.py" "/tmp/mit-degraded-alert.py"
+copy_remote "$tmp_script" "/tmp/setup-hermes-alerts.sh"
+run_remote "bash /tmp/setup-hermes-alerts.sh"
+rm -f "$tmp_script"
 echo "Installed degraded alert service."
 echo "Label: ${PLIST_LABEL}"
 echo "Interval: ${ALERT_INTERVAL}s"
