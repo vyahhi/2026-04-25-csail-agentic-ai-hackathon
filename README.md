@@ -112,6 +112,7 @@ Telegram busy-session behavior:
 
 - default: new messages are queued while Hermes is busy
 - interrupt command: `/stop`
+- quick MIT health command: `/mitstatus`
 
 Configure MIT Canvas access:
 

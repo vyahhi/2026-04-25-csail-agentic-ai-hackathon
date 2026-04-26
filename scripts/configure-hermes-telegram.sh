@@ -119,6 +119,7 @@ PY
 
 python3 - <<'PY'
 from pathlib import Path
+import re
 
 path = Path.home() / ".hermes" / "config.yaml"
 text = path.read_text() if path.exists() else ""
@@ -145,6 +146,43 @@ else:
 path.write_text(text)
 PY
 
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+path = Path.home() / ".hermes" / "config.yaml"
+text = path.read_text() if path.exists() else ""
+block = (
+    "quick_commands:\n"
+    "  mitstatus:\n"
+    "    type: exec\n"
+    "    command: ~/.hermes/scripts/mit-status.py --summary\n"
+)
+
+if "quick_commands:" not in text:
+    text = text.rstrip() + "\n\n" + block
+else:
+    pattern = re.compile(
+        r"(^quick_commands:\n(?:^[^\S\r\n].*\n)*)",
+        re.M,
+    )
+    match = pattern.search(text)
+    if match:
+        section = match.group(1)
+        if re.search(r"^\s{2}mitstatus:\n(?:^\s{4}.*\n)*", section, re.M):
+            section = re.sub(
+                r"^\s{2}mitstatus:\n(?:^\s{4}.*\n)*",
+                "  mitstatus:\n    type: exec\n    command: ~/.hermes/scripts/mit-status.py --summary\n",
+                section,
+                flags=re.M,
+            )
+        else:
+            section = section + "  mitstatus:\n    type: exec\n    command: ~/.hermes/scripts/mit-status.py --summary\n"
+        text = text[:match.start(1)] + section + text[match.end(1):]
+
+path.write_text(text)
+PY
+
 echo "Configured display.busy_input_mode=queue in ~/.hermes/config.yaml"
 hermes gateway status || true
 REMOTE_SCRIPT
@@ -157,6 +195,7 @@ if [[ -z "$TELEGRAM_ALLOWED_USERS" || -z "$TELEGRAM_HOME_CHANNEL" ]]; then
   echo "Telegram token is configured, but allowed/home user IDs are not set."
   echo "Send /start to the bot, then run scripts/resolve-telegram-chat.sh or set TELEGRAM_ALLOWED_USERS and TELEGRAM_HOME_CHANNEL in .env."
 else
-  echo "Telegram token, allowlist, and home channel are configured."
+echo "Telegram token, allowlist, and home channel are configured."
 fi
 echo "Default busy-message mode is queue. Use /stop in Telegram to interrupt the current task."
+echo "Quick command /mitstatus runs ~/.hermes/scripts/mit-status.py --summary."

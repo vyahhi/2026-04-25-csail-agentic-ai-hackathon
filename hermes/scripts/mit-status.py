@@ -209,8 +209,46 @@ def check_piazza():
     return {"ok": result["ok"], "detail": detail, "visible_classes": classes}
 
 
+def render_summary(snapshot):
+    lines = ["MIT assistant status"]
+    order = [
+        ("vpn", "VPN"),
+        ("browser_cdp", "Browser CDP"),
+        ("gateway", "Gateway"),
+        ("telegram", "Telegram"),
+        ("canvas", "Canvas"),
+        ("mit_email_apple_mail", "MIT email (Apple Mail)"),
+        ("mit_email_outlook_browser", "MIT email (Outlook browser)"),
+        ("piazza", "Piazza"),
+    ]
+    for key, label in order:
+        item = snapshot.get(key, {})
+        ok = bool(item.get("ok"))
+        icon = "OK" if ok else "WARN"
+        detail = (item.get("detail") or "").strip().splitlines()[0] if item.get("detail") else ""
+        extra = []
+        if key == "canvas" and item.get("sample_course"):
+            extra.append(f"course={item['sample_course']}")
+        if key in ("mit_email_apple_mail", "mit_email_outlook_browser") and item.get("sample_subject"):
+            extra.append(f"subject={item['sample_subject']}")
+        if key == "piazza" and item.get("visible_classes") is not None:
+            extra.append(f"classes={item['visible_classes']}")
+        if key == "telegram" and item.get("busy_input_mode"):
+            extra.append(f"busy_mode={item['busy_input_mode']}")
+        if key == "vpn" and item.get("kb_url"):
+            extra.append(f"kb={item['kb_url']}")
+        suffix = f" ({', '.join(extra)})" if extra else ""
+        lines.append(f"- {label}: {icon}{suffix}")
+        if detail:
+            lines.append(f"  {detail}")
+    return "\n".join(lines)
+
+
 def main():
     load_env_file()
+    parser = argparse.ArgumentParser(description="MIT assistant health snapshot.")
+    parser.add_argument("--summary", action="store_true", help="Print a human-readable summary instead of JSON")
+    args = parser.parse_args()
     snapshot = {
         "vpn": check_vpn(),
         "browser_cdp": check_browser(),
@@ -221,7 +259,10 @@ def main():
         "mit_email_outlook_browser": check_outlook_browser(),
         "piazza": check_piazza(),
     }
-    print(json.dumps(snapshot, indent=2, ensure_ascii=False))
+    if args.summary:
+        print(render_summary(snapshot))
+    else:
+        print(json.dumps(snapshot, indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
