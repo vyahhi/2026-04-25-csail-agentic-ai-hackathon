@@ -166,8 +166,8 @@ The printer lookup helper fetches MIT KB Pharos printer locations and CSAIL TIG
 printer docs live on every query. No local printer dataset is installed or used.
 The MIT KB Pharos page may redirect to an access-restricted page from the
 off-campus Mac mini; when that happens, the helper reports the source failure
-and returns only sources it could fetch live. With MIT VPN connected, Hermes now
-prefers direct IPP printing to reachable public MIT printer queues such as:
+and returns only sources it could fetch live. With MIT VPN connected, Hermes
+can reach direct IPP printer endpoints such as:
 
 ```text
 ipp://stata-p.mit.edu/printers/stata-p
@@ -175,13 +175,18 @@ ipp://stata-color.mit.edu/printers/stata-color
 ```
 
 That browserless path was verified from the Mac mini over VPN with successful
-`Print-Job` submissions. If direct IPP is unavailable for the selected printer,
-Hermes next tries a local `lp` queue if one is configured. Remote Pharos
-printing then falls back to Athena Print Center/MobilePrint at
-`https://print.mit.edu`. I still did not find a documented stable public API for
-remote MobilePrint submission/release, so Hermes keeps a browser-backed helper
-for that path. The shell wrapper falls back to instruction-only output only if
-both the direct and browser-backed paths are unavailable.
+`Print-Job` submissions, but MIT’s public Pharos docs emphasize the Pharos
+queue/client and MobilePrint flows rather than specific-printer IPP accounting.
+So Hermes now treats direct IPP as an explicit advanced option only. The normal
+default path is:
+
+1. a configured local `lp`/Pharos queue, if present
+2. Athena Print Center/MobilePrint at `https://print.mit.edu`
+
+I still did not find a documented stable public API for remote MobilePrint
+submission/release, so Hermes keeps a browser-backed helper for that path. The
+shell wrapper falls back to instruction-only output only if both the documented
+queue path and the browser-backed path are unavailable.
 
 Configure MIT VPN / GlobalProtect:
 

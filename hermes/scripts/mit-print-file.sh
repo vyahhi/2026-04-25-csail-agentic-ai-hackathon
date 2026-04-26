@@ -8,9 +8,9 @@ Usage:
   mit-print-file.sh --url URL  [--location QUERY] [--method auto|ipp|mobileprint|lp] [--open-mobileprint] [--queue QUEUE] [--copies N] [--duplex] [--dry-run]
 
 Prints by one of three paths:
-  1. direct IPP to a reachable MIT printer over VPN/MITnet
-  2. local lp/CUPS queue if one is configured
-  3. Athena Print Center/MobilePrint browser automation
+  1. local lp/CUPS queue if one is configured
+  2. Athena Print Center/MobilePrint browser automation
+  3. direct IPP to a reachable MIT printer over VPN/MITnet as an explicit advanced mode
 
 MobilePrint URL: https://print.mit.edu
 
@@ -272,16 +272,6 @@ if [[ "$method" == "ipp" ]]; then
   fi
   echo "Direct IPP printing is not available for the requested printer from this machine." >&2
   exit 1
-fi
-
-if [[ "$method" == "auto" ]]; then
-  explicit_queue=""
-  if [[ "$queue_explicit" == true ]]; then
-    explicit_queue="$queue"
-  fi
-  if run_ipp_print "$explicit_queue"; then
-    exit 0
-  fi
 fi
 
 if ! command -v lp >/dev/null 2>&1; then
