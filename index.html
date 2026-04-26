@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hermes — MIT Personal AI Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #A31F34;
+      --red-dk: #8a1a2b;
+      --gray:   #f4f4f4;
+      --mid:    #666;
+      --dark:   #1a1a1a;
+      --white:  #ffffff;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--dark);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      border-bottom: 1px solid #e8e8e8;
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--dark);
+      text-decoration: none;
+    }
+
+    .nav-logo svg { flex-shrink: 0; }
+
+    nav a.btn-outline {
+      padding: 8px 20px;
+      border: 2px solid var(--red);
+      color: var(--red);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    nav a.btn-outline:hover { background: var(--red); color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 96px 24px 80px;
+      background: linear-gradient(160deg, #fff 60%, #fdf0f2 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fde8ec;
+      color: var(--red);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--dark);
+      max-width: 760px;
+    }
+
+    .hero h1 span { color: var(--red); }
+
+    .hero p {
+      margin-top: 20px;
+      font-size: 1.15rem;
+      color: var(--mid);
+      max-width: 560px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--red);
+      color: var(--white);
+      padding: 14px 30px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(163,31,52,0.25);
+    }
+    .btn-primary:hover { background: var(--red-dk); transform: translateY(-1px); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      color: var(--dark);
+      padding: 14px 30px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: 2px solid #e0e0e0;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-secondary:hover { border-color: #aaa; transform: translateY(-1px); }
+
+    /* ── HOW IT WORKS ── */
+    .how {
+      background: var(--gray);
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--mid);
+      max-width: 520px;
+      margin: 0 auto 48px;
+    }
+
+    .steps {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .step {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      flex: 1 1 220px;
+      max-width: 260px;
+      text-align: left;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      position: relative;
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .step p  { font-size: 0.88rem; color: var(--mid); }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1.5px solid #ececec;
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      text-align: left;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #fde8ec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+    }
+
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .card p  { font-size: 0.88rem; color: var(--mid); line-height: 1.55; }
+
+    /* ── DEMO SNIPPET ── */
+    .demo {
+      background: var(--dark);
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .demo .section-title { color: var(--white); }
+    .demo .section-sub   { color: #aaa; }
+
+    .terminal {
+      background: #111;
+      border-radius: var(--radius);
+      max-width: 580px;
+      margin: 0 auto;
+      text-align: left;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .terminal-bar {
+      background: #2a2a2a;
+      padding: 10px 16px;
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+
+    .terminal-title {
+      font-size: 0.75rem;
+      color: #888;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: monospace;
+    }
+
+    .terminal-body {
+      padding: 24px 28px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .t-user  { color: #82c3f8; }
+    .t-hermes { color: #6ee7b7; }
+    .t-dim   { color: #666; }
+    .t-white { color: #e8e8e8; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--gray);
+      border-top: 1px solid #e0e0e0;
+      padding: 40px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 16px;
+    }
+
+    footer .footer-logo {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    footer p {
+      font-size: 0.85rem;
+      color: var(--mid);
+    }
+
+    footer a {
+      color: var(--red);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 64px 20px 60px; }
+      footer { flex-direction: column; text-align: center; padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="7" fill="#A31F34"/>
+      <path d="M7 8h3v5h8V8h3v12h-3v-5H10v5H7V8z" fill="white"/>
+    </svg>
+    Hermes
+  </a>
+  <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="btn-outline" target="_blank" rel="noopener">View on GitHub</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#A31F34" stroke-width="1.5"/><path d="M6 4v2.5L7.5 8" stroke="#A31F34" stroke-width="1.5" stroke-linecap="round"/></svg>
+    CSAIL Agentic AI Hackathon · 2026
+  </div>
+  <h1>Your MIT life,<br><span>on autopilot.</span></h1>
+  <p>Hermes is an AI assistant that lives on your Mac mini and handles MIT-specific tasks — courses, email, printing, campus status — right from Telegram.</p>
+  <div class="hero-cta">
+    <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" class="btn-primary" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#features" class="btn-secondary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+      See Features
+    </a>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <p class="section-label">How it works</p>
+  <h2 class="section-title">Simple setup, powerful results</h2>
+  <p class="section-sub">Hermes runs quietly on a Mac mini, wired into your MIT accounts — and answers wherever you are.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Deploy on a Mac mini</h3>
+      <p>One script provisions Hermes on your Mac mini with all MIT integrations wired up automatically.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Connect your MIT accounts</h3>
+      <p>Link Canvas, email, and Piazza once. Hermes uses a persistent browser session to handle MIT SSO and Duo seamlessly.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Chat on Telegram</h3>
+      <p>Send a message from anywhere. Hermes reads your courses, checks your email, queues print jobs — all in plain language.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <p class="section-label">Features</p>
+  <h2 class="section-title">Built for life at MIT</h2>
+  <p class="section-sub">Every integration is tailored to MIT's specific systems — not generic wrappers.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="card-icon">📚</div>
+      <h3>Canvas &amp; Piazza</h3>
+      <p>Instantly surface assignments, announcements, and discussion posts from your active courses — no portal hunting.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✉️</div>
+      <h3>MIT Email</h3>
+      <p>Check and summarize your inbox via Apple Mail or Outlook, without leaving the Telegram conversation.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖨️</div>
+      <h3>MIT Printing</h3>
+      <p>Send files to MobilePrint or a configured Pharos queue. Finds available printers dynamically across campus.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h3>VPN &amp; SSO</h3>
+      <p>GlobalProtect VPN managed automatically. MIT SSO sessions reused so you skip repeated Touchstone and Duo prompts.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📡</div>
+      <h3>MIT Status</h3>
+      <p>Get a live health snapshot of MIT web services — portal, Canvas, email, and more — with a single command.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💬</div>
+      <h3>Telegram Interface</h3>
+      <p>No app to install. Works on any device. Long tasks queue while Hermes is busy and deliver when ready.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="demo">
+  <p class="section-label" style="color:#888">See it in action</p>
+  <h2 class="section-title">Plain language. Real results.</h2>
+  <p class="section-sub" style="margin-bottom:40px">Ask in natural language. Hermes figures out which MIT system to call and gets it done.</p>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot dot-r"></span>
+      <span class="dot dot-y"></span>
+      <span class="dot dot-g"></span>
+      <span class="terminal-title">Telegram → Hermes</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-user">You</span> <span class="t-dim">10:42</span></div>
+      <div class="t-white">What's due this week in 6.824?</div>
+      <br>
+      <div><span class="t-hermes">Hermes</span> <span class="t-dim">10:42</span></div>
+      <div class="t-white">Found 2 items in 6.824 (Distributed Systems):</div>
+      <div class="t-white">• Lab 2B — due Thursday 23:59</div>
+      <div class="t-white">• Reading response — due Friday 12:00</div>
+      <br>
+      <div><span class="t-user">You</span> <span class="t-dim">10:43</span></div>
+      <div class="t-white">Print my resume to the nearest CSAIL printer</div>
+      <br>
+      <div><span class="t-hermes">Hermes</span> <span class="t-dim">10:43</span></div>
+      <div class="t-white">Sent resume.pdf to <span style="color:#fcd34d">G882-printer</span> via MobilePrint.</div>
+      <div class="t-white">Estimated ready: ~2 min.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#A31F34"/><path d="M7 8h3v5h8V8h3v12h-3v-5H10v5H7V8z" fill="white"/></svg>
+    Hermes
+  </div>
+  <p>Built at the <a href="https://www.csail.mit.edu/" target="_blank" rel="noopener">CSAIL</a> Agentic AI Hackathon · April 2026</p>
+  <a href="https://github.com/vyahhi/2026-04-25-csail-agentic-ai-hackathon" target="_blank" rel="noopener">GitHub →</a>
+</footer>
+
+</body>
+</html>
