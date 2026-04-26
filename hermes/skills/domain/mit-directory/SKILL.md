@@ -41,6 +41,54 @@ ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
   cn displayName givenName sn mail uid
 ```
 
+Use this only for quick spot checks, not for a completeness claim.
+On this MIT LDAP server, a broad first-name query can under-return even when you add paged-results controls.
+
+### Important: avoid LDAP size-limit traps on broad first-name searches
+
+Broad queries like `FirstName*` can hit the MIT LDAP server size limit and silently omit valid matches if you only parse the returned entries. Watch for:
+
+```text
+result: 4 Size limit exceeded
+numEntries: 100
+```
+
+When that happens, do **not** trust the result set as complete.
+
+Instead:
+
+1. Say the broad query is incomplete.
+2. Narrow the search by surname, uid, or mail when possible.
+3. For a request like "do you see FirstName LastName", use exact targeted filters first:
+
+```bash
+ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
+  '(|(cn=*LastName*)(displayName=*LastName*)(sn=LastName)(mail=*username*)(uid=*username*))' \
+  cn displayName givenName sn mail uid
+
+ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
+  '(uid=username)' '*' '+'
+```
+
+4. For "list all FirstName", do **not** rely on one broad query or assume paged-results control fixes it.
+5. For a completeness-oriented first-name search, split the query into smaller surname buckets and merge the results. This avoids the LDAP size-limit trap and successfully finds entries missed by the single broad query, including `FirstName LastName`.
+
+Example strategy:
+
+```bash
+for L in {A..Z}; do
+  ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
+    "(&(|(givenName=FirstName*)(displayName=FirstName*)(cn=FirstName*))(sn=${L}*))" \
+    cn displayName givenName sn mail uid
+  sleep 0.2
+done
+```
+
+Then post-process to:
+- keep only names / given names beginning with `FirstName`
+- deduplicate by `(name, mail, uid)`
+- report entries with missing public email as name-only
+
 ### Exact username lookup
 
 ```bash
