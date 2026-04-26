@@ -384,7 +384,8 @@ Optional `.env` overrides:
 HERMES_MIT_BRIEFING_NAME=mit-daily-briefing
 HERMES_MIT_BRIEFING_SCHEDULE=0 8 * * *
 HERMES_MIT_BRIEFING_DELIVER=telegram
-HERMES_MIT_BRIEFING_WORKDIR=/absolute/path/to/this/repo
+# Optional remote absolute path on the Mac mini if you want repo context.
+HERMES_MIT_BRIEFING_WORKDIR=
 ```
 
 The cron job uses:

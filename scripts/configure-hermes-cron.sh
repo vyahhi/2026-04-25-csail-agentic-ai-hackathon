@@ -22,7 +22,7 @@ SSH_PASSWORD="${MAC_MINI_SSH_PASSWORD:?MAC_MINI_SSH_PASSWORD is required}"
 JOB_NAME="${HERMES_MIT_BRIEFING_NAME:-mit-daily-briefing}"
 SCHEDULE="${HERMES_MIT_BRIEFING_SCHEDULE:-0 8 * * *}"
 DELIVER="${HERMES_MIT_BRIEFING_DELIVER:-telegram}"
-WORKDIR="${HERMES_MIT_BRIEFING_WORKDIR:-$REPO_ROOT}"
+WORKDIR="${HERMES_MIT_BRIEFING_WORKDIR:-}"
 
 PROMPT="$(cat <<'EOF'
 Prepare Nikolay's daily MIT briefing. Keep it concise and operational.
@@ -142,12 +142,20 @@ subprocess.run(
         "--skill", "piazza",
         "--skill", "mit-status",
         "--skill", "mit-canvas-course",
-        "--workdir", shlex.quote(workdir),
-    ]),
+    ] + (["--workdir", shlex.quote(workdir)] if workdir else [])),
     shell=True,
     check=True,
 )
-subprocess.run(f'{hermes} cron list', shell=True, check=True)
+final_list = subprocess.run(
+    f'{hermes} cron list',
+    shell=True,
+    check=True,
+    capture_output=True,
+    text=True,
+).stdout
+print(final_list, end="")
+if name not in clean(final_list):
+    raise SystemExit(f"Cron job '{name}' was not created successfully.")
 PY
 REMOTE_CMD
 )"
