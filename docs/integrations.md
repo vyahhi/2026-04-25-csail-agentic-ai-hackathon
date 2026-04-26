@@ -129,7 +129,7 @@ Commands:
 ~/.hermes/scripts/persistent-browser-cdp.sh stop
 ```
 
-## MIT Email and Piazza
+## MIT Email, Directory, and Piazza
 
 Configure:
 
@@ -141,6 +141,7 @@ Installed pieces:
 
 ```text
 hermes/skills/domain/mit-email/SKILL.md
+hermes/skills/domain/mit-directory/SKILL.md
 hermes/skills/domain/mit-status/SKILL.md
 hermes/skills/domain/piazza/SKILL.md
 hermes/scripts/mit-email-applemail.py
@@ -157,6 +158,9 @@ Current supported mail paths:
 Not part of the supported active path:
 
 - raw IMAP password auth
+
+MIT directory lookups use public LDAP on `ldap.mit.edu`; the directory website
+is not the primary path on the Mac mini.
 
 Mail checks:
 

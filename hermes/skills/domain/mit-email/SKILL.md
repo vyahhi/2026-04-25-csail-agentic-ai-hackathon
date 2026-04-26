@@ -55,3 +55,4 @@ open -a Mail
 - Raw IMAP/SMTP support exists in Hermes, but Microsoft 365 commonly requires Modern Auth/OAuth2. Avoid storing MIT account passwords for mailbox access.
 - `~/.hermes/scripts/mit-email-applemail.py` is the Apple Mail helper for this Mac mini and uses the Mail app path directly.
 - Apple Mail is the intended primary path for this user's MIT mailbox on this Mac mini.
+- When you need a custom Apple Mail query that the helper does not expose, prefer `execute_code` with `subprocess.run(['osascript', '-e', SCRIPT], ...)` instead of a shell heredoc through `terminal()`. AppleScript uses `&` for string concatenation, and Hermes terminal safety may misread that as shell backgrounding.
