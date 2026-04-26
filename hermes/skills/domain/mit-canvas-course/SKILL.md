@@ -75,24 +75,28 @@ Observed behavior on MIT Canvas:
 
 Practical implication:
 
-- if the user asks for an announcement draft directly on Canvas, the safest achievable state may be a pre-filled, unsubmitted compose form rather than a true server-side draft
-- do not click `Publish` unless the user explicitly asks for publication
+- if the user asks for an announcement draft directly on Canvas, the safest achievable state may be a **pre-filled, unsubmitted compose form** rather than a true server-side draft
+- do **not** click `Publish` unless the user explicitly asks for publication
 - be explicit that the compose URL is not evidence of a persisted draft object
 
 ## Rich-text editor / announcement formatting pitfalls
 
 Observed on MIT Canvas announcements:
 
-- pasting or programmatically inserting a raw URL into the Rich Content Editor can publish as plain text like `<p>...<br>https://example.com/...<br>...</p>`
-- in that case the URL is visible but not clickable in the rendered announcement because Canvas saved no `<a href="...">...</a>` tag
+- pasting or programmatically inserting a raw URL into the Rich Content Editor can publish as plain text like:
+  `<p>...<br>https://example.com/...<br>...</p>`
+- in that case the URL is visible but **not clickable** in the rendered announcement because Canvas saved no `<a href="...">...</a>` tag
 
-Preferred future workflow for links in announcements, pages, or discussions:
+Preferred future workflow for links in announcements/pages/discussions:
 
 1. When a link should be clickable, insert it explicitly as an anchor, not as raw text.
 2. Prefer one of these methods before publishing:
-   - use the editor's Links control, or
-   - switch to the HTML editor and wrap the URL manually, e.g. `<a href="https://example.com/...">slide deck</a>`
-3. After saving or publishing, verify in the rendered page DOM that the content contains an actual `<a>` element, not just visible URL text.
+   - use the editor's **Links** control, or
+   - switch to the HTML editor and wrap the URL manually, e.g.
+     ```html
+     <a href="https://example.com/...">slide deck</a>
+     ```
+3. After saving/publishing, verify in the rendered page DOM that the content contains an actual `<a>` element, not just visible URL text.
 4. If composing via browser automation/JS, set the editor HTML to include anchors rather than only setting a hidden textarea's plain-text value.
 
 ## Browser UI authoring notes for announcements
@@ -112,7 +116,7 @@ Reliable pattern:
 2. Set the hidden textarea with the native HTMLTextAreaElement value setter, then dispatch `input` and `change`.
 3. If the rich text editor iframe is present, mirror the body text there as well.
 4. Re-read the field values before clicking `Publish`.
-5. After publishing, verify success by checking that the URL changes from `/discussion_topics/new?is_announcement=true` to a concrete discussion topic URL like `/discussion_topics/<id>?is_announcement=true` and that the page shows the posted announcement.
+5. After publish, verify success by checking that the URL changes from `/discussion_topics/new?is_announcement=true` to a concrete discussion topic URL like `/discussion_topics/<id>?is_announcement=true` and that the page shows the posted announcement.
 
 Important failure mode observed:
 
