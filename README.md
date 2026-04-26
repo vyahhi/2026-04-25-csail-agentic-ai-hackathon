@@ -166,15 +166,22 @@ The printer lookup helper fetches MIT KB Pharos printer locations and CSAIL TIG
 printer docs live on every query. No local printer dataset is installed or used.
 The MIT KB Pharos page may redirect to an access-restricted page from the
 off-campus Mac mini; when that happens, the helper reports the source failure
-and returns only sources it could fetch live. The Mac mini is not on the local
-MIT network, so direct printing with `lp` is attempted only if a local MIT print
-queue is configured. Remote Pharos printing uses Athena Print Center/MobilePrint
-at `https://print.mit.edu`. I did not find a documented stable public API for
-remote MobilePrint submission/release, so Hermes currently uses a browser-backed
-helper for that path. Hermes also has a browser-backed helper that can
-upload and release jobs through the persistent Chrome session when MIT SSO is
-still valid. The shell wrapper falls back to instruction-only output only if the
-browser path is not authenticated or the site flow is blocked.
+and returns only sources it could fetch live. With MIT VPN connected, Hermes now
+prefers direct IPP printing to reachable public MIT printer queues such as:
+
+```text
+ipp://stata-p.mit.edu/printers/stata-p
+ipp://stata-color.mit.edu/printers/stata-color
+```
+
+That browserless path was verified from the Mac mini over VPN with successful
+`Print-Job` submissions. If direct IPP is unavailable for the selected printer,
+Hermes next tries a local `lp` queue if one is configured. Remote Pharos
+printing then falls back to Athena Print Center/MobilePrint at
+`https://print.mit.edu`. I still did not find a documented stable public API for
+remote MobilePrint submission/release, so Hermes keeps a browser-backed helper
+for that path. The shell wrapper falls back to instruction-only output only if
+both the direct and browser-backed paths are unavailable.
 
 Configure MIT VPN / GlobalProtect:
 

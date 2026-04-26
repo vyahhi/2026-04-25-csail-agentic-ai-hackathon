@@ -1,6 +1,6 @@
 ---
 name: mit-printers
-description: Find MIT printers near a fuzzy campus location and help print Telegram attachments or URLs using MIT Pharos/Athena Print Center or a configured local print queue.
+description: Find MIT printers near a fuzzy campus location and help print Telegram attachments or URLs using direct IPP over MIT VPN, MIT Pharos/Athena Print Center, or a configured local print queue.
 ---
 
 # MIT Printers
@@ -9,15 +9,15 @@ Use this skill when the user asks to find a printer at MIT, print a document, pr
 
 ## Operating Rules
 
-- The configured Mac mini is not on the local MIT network. Do not assume it can reach MIT-only printers, MITnet-only KB pages, or department print queues directly.
+- The configured Mac mini is normally off local MIT network, but it can use MIT VPN. When VPN is connected, prefer direct IPP to public MIT printers that actually respond.
 - Use `mit-printer-find.py`, which includes a bundled public MIT printer baseline and augments it with live source lookup when available. Do not create a separate local cached printer dataset.
 - If a live source redirects to an access-restricted page from the off-campus Mac mini, report that source failure and use only the sources that were actually fetched.
 - Treat printing as a user-visible side effect. Confirm the document and destination before submitting to a local print queue unless the user has already explicitly said to print that exact file.
-- Prefer MIT Pharos for general campus printing. MIT IS&T documents that users can install the Pharos client or use Athena Print Center/MobilePrint at `https://print.mit.edu` to upload documents and release jobs at Pharos printers.
+- Prefer MIT Pharos for general campus printing. With MIT VPN active, first try direct IPP to the selected public MIT printer. If that printer is not directly reachable, fall back to Athena Print Center/MobilePrint at `https://print.mit.edu`.
 - For Pharos, the selected nearby printer is normally where the user releases the job; the submitted queue may be a central queue such as `mitprint`.
-- Hermes can submit and release MobilePrint jobs through the persistent Chrome session on the Mac mini when `print.mit.edu` is still authenticated. Prefer that over instruction-only responses.
-- Do not claim a document was physically printed unless `lp` or the MobilePrint browser helper succeeded. Otherwise say it is only prepared and why.
-- If the local machine is off MITnet or has no MIT print queue configured, use Athena Print Center/MobilePrint at `https://print.mit.edu` as the remote printing path and provide the nearest printer candidates.
+- Hermes can submit direct IPP jobs to reachable public MIT printers without a browser. If that path is unavailable, Hermes can submit and release MobilePrint jobs through the persistent Chrome session on the Mac mini when `print.mit.edu` is still authenticated.
+- Do not claim a document was physically printed unless direct IPP, `lp`, or the MobilePrint browser helper succeeded. Otherwise say it is only prepared and why.
+- If direct IPP and local `lp` are unavailable, use Athena Print Center/MobilePrint at `https://print.mit.edu` as the remote printing path and provide the nearest printer candidates.
 - The MIT KB Touchless Printing Release with MobilePrint page is the reference for remote release, but it may require MITnet or MIT VPN.
 - Use only documents or URLs the user supplied. Do not access private documents without explicit user intent.
 - For public MIT printer queries near CSAIL/Stata/Building 32, return only general MIT Pharos printers by default, not CSAIL department-local queues.
@@ -55,13 +55,14 @@ Use:
 ~/.hermes/scripts/mit-print-browser.py print --file /path/to/document.pdf --printer stata-p
 ~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --location "building 10"
 ~/.hermes/scripts/mit-print-file.sh --url "https://example.edu/file.pdf" --location "stata"
+~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --method ipp --queue stata-p
 ~/.hermes/scripts/mit-print-file.sh --file /path/to/document.pdf --method mobileprint --open-mobileprint
 ```
 
 Optional flags:
 
 ```text
---method auto|mobileprint|lp
+--method auto|ipp|mobileprint|lp
 --open-mobileprint
 --queue QUEUE     default: MIT_PRINT_QUEUE or mitprint
 --copies N        default: 1
@@ -69,13 +70,24 @@ Optional flags:
 --dry-run
 ```
 
-If `lp`, MITnet, or the queue is unavailable, the helper should first try the MobilePrint browser helper. Run the browser helper from the Hermes repo venv, not system Python, because the working environment may only have the required websocket/browser dependencies there:
+When MIT VPN is active, `mit-print-file.sh` should first try direct IPP to the nearest public MIT printer inferred from `--location` or `--queue`. If direct IPP is unavailable, it should next try a configured local `lp` queue, then fall back to the MobilePrint browser helper. Run the browser helper from the Hermes repo venv, not system Python, because the working environment may only have the required websocket/browser dependencies there:
 
 ```bash
 source ~/.hermes/hermes-agent/venv/bin/activate && python ~/.hermes/scripts/mit-print-browser.py print --file /absolute/path/to/file.pdf --printer stata-p
 ```
 
 If the persistent browser session is not authenticated, it then prints MobilePrint upload/release instructions. `--open-mobileprint` opens `https://print.mit.edu` on the Mac mini desktop.
+
+## Verified Direct IPP Path
+
+On this Mac mini with MIT VPN connected, direct IPP submission has been verified against:
+
+```text
+ipp://stata-p.mit.edu/printers/stata-p
+ipp://stata-color.mit.edu/printers/stata-color
+```
+
+So for public MIT printers with reachable IPP endpoints, Hermes should prefer that browserless path first.
 
 ### CDP fallback when the browser helper stalls
 
@@ -106,7 +118,7 @@ When a user asks from Telegram to print an attached file:
 1. Locate the downloaded attachment path or URL in the current Telegram/Hermes message context.
 2. If only a Telegram URL is available, download it to a temporary file.
 3. Run `mit-print-file.sh --file ... --location ...` or `--url ...`.
-4. Prefer `--method mobileprint --queue ...` for remote Pharos printing. That path should attempt browser-based submission/release first, then fall back to instructions only if authentication or the site flow blocks it.
+4. Prefer `--method auto` or `--method ipp` for public MIT printers first. If direct IPP is unavailable, then use the browser-based MobilePrint path.
 
 ## Sources
 
