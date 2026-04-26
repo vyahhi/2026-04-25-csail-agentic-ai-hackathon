@@ -15,8 +15,8 @@ docs/     setup, integration, and operations detail
 ## Verified Target
 
 ```text
-Tailscale DNS: nicolaws-mac-mini.tail3b0ac2.ts.net
-SSH user: nicolaw
+Tailscale DNS: set in local .env as MAC_MINI_TAILSCALE_DNS
+SSH user: set in local .env as MAC_MINI_SSH_USER
 Hermes: v0.11.0
 Provider: openai-codex
 Default model: gpt-5.4

@@ -60,7 +60,7 @@ client = openai.OpenAI(
 Run from the Hermes repo with the repo venv activated.
 
 ```bash
-source /Users/nicolaw/.hermes/hermes-agent/venv/bin/activate && python - <<'PY'
+source ~/.hermes/hermes-agent/venv/bin/activate && python - <<'PY'
 from agent.auxiliary_client import _read_codex_access_token, _codex_cloudflare_headers
 from pathlib import Path
 import base64, openai

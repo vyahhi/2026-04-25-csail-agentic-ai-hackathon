@@ -25,7 +25,7 @@ DELIVER="${HERMES_MIT_BRIEFING_DELIVER:-telegram}"
 WORKDIR="${HERMES_MIT_BRIEFING_WORKDIR:-}"
 
 PROMPT="$(cat <<'EOF'
-Prepare Nikolay's daily MIT briefing. Keep it concise and operational.
+Prepare the user's daily MIT briefing. Keep it concise and operational.
 
 Include:
 1. important unread or recent MIT email items

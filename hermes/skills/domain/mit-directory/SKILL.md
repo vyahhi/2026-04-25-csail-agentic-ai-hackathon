@@ -46,7 +46,7 @@ On this MIT LDAP server, a broad first-name query can under-return even when you
 
 ### Important: avoid LDAP size-limit traps on broad first-name searches
 
-Broad queries like `FirstName*` can hit the MIT LDAP server size limit and silently omit valid matches if you only parse the returned entries. Watch for:
+Broad first-name queries can hit the MIT LDAP server size limit and silently omit valid matches if you only parse the returned entries. Watch for:
 
 ```text
 result: 4 Size limit exceeded
@@ -70,8 +70,8 @@ ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
   '(uid=username)' '*' '+'
 ```
 
-4. For "list all FirstName", do **not** rely on one broad query or assume paged-results control fixes it.
-5. For a completeness-oriented first-name search, split the query into smaller surname buckets and merge the results. This avoids the LDAP size-limit trap and successfully finds entries missed by the single broad query, including `FirstName LastName`.
+4. For "list all people named FirstName", do **not** rely on one broad query or assume paged-results control fixes it.
+5. For a completeness-oriented first-name search, split the query into smaller surname buckets and merge the results. This avoids the LDAP size-limit trap and can find entries missed by the single broad query.
 
 Example strategy:
 
@@ -85,7 +85,7 @@ done
 ```
 
 Then post-process to:
-- keep only names / given names beginning with `FirstName`
+- keep only names / given names beginning with the requested first name
 - deduplicate by `(name, mail, uid)`
 - report entries with missing public email as name-only
 
@@ -93,23 +93,23 @@ Then post-process to:
 
 ```bash
 ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
-  '(uid=zuber)' cn displayName mail uid
+  '(uid=username)' cn displayName mail uid
 ```
 
 ### Exact email lookup
 
 ```bash
 ldapsearch -x -LLL -H ldap://ldap.mit.edu -b 'dc=mit,dc=edu' \
-  '(mail=mtz@mit.edu)' cn displayName mail uid
+  '(mail=username@mit.edu)' cn displayName mail uid
 ```
 
 ## Notes
 
 - Some entries expose a name but no public email.
 - Results can include people whose given name merely starts with the query string unless you filter more tightly in post-processing.
-- For a user request like "list all FirstName", prefer post-processing to keep only names beginning with `FirstName`, and exclude `LongerFirstName*`, `LongerFirstNamea*`, `LongerFirstName*`, etc. unless the user asked for prefix matches.
+- For a user request like "list all people named FirstName", prefer post-processing to keep only exact requested first-name matches and exclude longer prefix matches unless the user asked for prefix matches.
 - `directory.mit.edu` itself may time out on ports 80 and 443 from this machine; that is not proof the MIT directory is unavailable, only that the website path is unreliable here.
-- Some MIT addresses in email headers use subdomain aliases such as `user@csail.mit.edu` or `user@media.mit.edu` while the public LDAP `mail` attribute may only expose `user@mit.edu`. If an exact `(mail=...)` lookup fails for a MIT-looking address, retry by UID using the local part before the `@`, for example `lauralyn@csail.mit.edu` to `(uid=lauralyn)`.
+- Some MIT addresses in email headers use subdomain aliases such as `user@csail.mit.edu` or `user@media.mit.edu` while the public LDAP `mail` attribute may only expose `user@mit.edu`. If an exact `(mail=...)` lookup fails for a MIT-looking address, retry by UID using the local part before the `@`.
 
 ## Response style
 

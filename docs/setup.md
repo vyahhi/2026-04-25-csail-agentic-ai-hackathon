@@ -60,7 +60,7 @@ As last audited:
 ```text
 macOS: 26.3 (build 25D125)
 Homebrew: /opt/homebrew/bin/brew
-Hermes CLI: /Users/nicolaw/.local/bin/hermes
+Hermes CLI: ~/.local/bin/hermes
 Codex CLI: /opt/homebrew/bin/codex
 ripgrep: /opt/homebrew/bin/rg
 ```
