@@ -12,7 +12,7 @@ Behavior:
 
 - busy messages queue by default
 - interrupt command: `/stop`
-- MIT health commands: `/mitstatus`, `/mit_status`
+- MIT health command: `/mit_status`
 
 ## Canvas
 

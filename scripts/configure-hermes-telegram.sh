@@ -210,4 +210,4 @@ else
 echo "Telegram token, allowlist, and home channel are configured."
 fi
 echo "Default busy-message mode is queue. Use /stop in Telegram to interrupt the current task."
-echo "Quick commands /mitstatus and /mit_status run ~/.hermes/scripts/mit-status.py --summary."
+echo "Quick command /mit_status runs ~/.hermes/scripts/mit-status.py --summary."
