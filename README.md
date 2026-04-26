@@ -51,7 +51,7 @@ Telegram:
 
 - queue by default while busy
 - interrupt command: `/stop`
-- MIT health command: `/mitstatus`
+- MIT health commands: `/mitstatus`, `/mit_status`
 
 Remote checks:
 

@@ -157,6 +157,9 @@ block = (
     "  mitstatus:\n"
     "    type: exec\n"
     "    command: ~/.hermes/scripts/mit-status.py --summary\n"
+    "  mit_status:\n"
+    "    type: exec\n"
+    "    command: ~/.hermes/scripts/mit-status.py --summary\n"
 )
 
 if "quick_commands:" not in text:
@@ -178,6 +181,15 @@ else:
             )
         else:
             section = section + "  mitstatus:\n    type: exec\n    command: ~/.hermes/scripts/mit-status.py --summary\n"
+        if re.search(r"^\s{2}mit_status:\n(?:^\s{4}.*\n)*", section, re.M):
+            section = re.sub(
+                r"^\s{2}mit_status:\n(?:^\s{4}.*\n)*",
+                "  mit_status:\n    type: exec\n    command: ~/.hermes/scripts/mit-status.py --summary\n",
+                section,
+                flags=re.M,
+            )
+        else:
+            section = section + "  mit_status:\n    type: exec\n    command: ~/.hermes/scripts/mit-status.py --summary\n"
         text = text[:match.start(1)] + section + text[match.end(1):]
 
 path.write_text(text)
@@ -198,4 +210,4 @@ else
 echo "Telegram token, allowlist, and home channel are configured."
 fi
 echo "Default busy-message mode is queue. Use /stop in Telegram to interrupt the current task."
-echo "Quick command /mitstatus runs ~/.hermes/scripts/mit-status.py --summary."
+echo "Quick commands /mitstatus and /mit_status run ~/.hermes/scripts/mit-status.py --summary."
