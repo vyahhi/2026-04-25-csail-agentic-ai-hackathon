@@ -45,6 +45,7 @@ name: mit-daily-briefing
 schedule: 0 8 * * *
 delivery: telegram
 sources: MIT email, Piazza, Canvas, MIT assistant status
+extras: one short MIT-themed joke
 ```
 
 Calendar is not part of the briefing unless a calendar integration is added and

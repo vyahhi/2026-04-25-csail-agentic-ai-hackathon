@@ -32,6 +32,7 @@ Include:
 2. new Piazza questions or comments across visible classes
 3. today's and near-term Canvas deadlines or modules that need attention
 4. MIT assistant health warnings only if something is degraded
+5. one short random MIT-themed joke at the end
 
 Use only the installed MIT integrations and skills listed for this job.
 Do not mention Google Calendar, Google Workspace, or any calendar source unless a calendar integration is explicitly configured for this Hermes instance.
