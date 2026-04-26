@@ -1,10 +1,6 @@
 # Landing Page
 
-Live page:
-
-```text
-https://vyahhi.github.io/tim/
-```
+Live page: [https://vyahhi.github.io/tim/](https://vyahhi.github.io/tim/)
 
 Source in this repo:
 
