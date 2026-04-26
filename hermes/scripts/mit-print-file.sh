@@ -130,7 +130,7 @@ print(f"{queue}\t{host}")
 
 document_format() {
   local lower="${file##*/}"
-  lower="${lower,,}"
+  lower="$(printf '%s' "$lower" | tr '[:upper:]' '[:lower:]')"
   case "$lower" in
     *.pdf) echo "application/pdf" ;;
     *.txt|*.text|*.md|*.csv|*.log) echo "text/plain" ;;
