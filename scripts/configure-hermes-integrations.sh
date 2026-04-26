@@ -56,7 +56,7 @@ run_remote() {
     log_user 0
     set timeout -1
     set sent_login 0
-    spawn ssh -tt -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 $env(SSH_USER)@$env(SSH_HOST) $env(REMOTE_CMD)
+    spawn ssh -tt -o PubkeyAuthentication=no -o PreferredAuthentications=password -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 $env(SSH_USER)@$env(SSH_HOST) $env(REMOTE_CMD)
     log_user 1
     expect {
       -glob "*Password:*" {
@@ -92,7 +92,7 @@ copy_remote() {
     log_user 0
     set timeout -1
     set sent_login 0
-    spawn scp -q -o StrictHostKeyChecking=accept-new $env(LOCAL_PATH) $env(SSH_USER)@$env(SSH_HOST):$env(REMOTE_PATH)
+    spawn scp -q -o PubkeyAuthentication=no -o PreferredAuthentications=password -o StrictHostKeyChecking=accept-new $env(LOCAL_PATH) $env(SSH_USER)@$env(SSH_HOST):$env(REMOTE_PATH)
     log_user 1
     expect {
       -glob "*Password:*" {
