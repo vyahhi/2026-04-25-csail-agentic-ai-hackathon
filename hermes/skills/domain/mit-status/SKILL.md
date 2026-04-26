@@ -20,7 +20,7 @@ Use this skill when the user asks whether Hermes is working, what is broken, or 
 - Hermes gateway status
 - Telegram configuration and busy input mode
 - Canvas API token reachability
-- MIT email via Apple Mail helper, including AppleScript fallback when direct SQLite access fails
+- MIT email via Apple Mail helper
 - MIT email via saved Outlook browser session
 - Piazza course visibility
 

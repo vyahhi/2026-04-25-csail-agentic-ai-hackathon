@@ -27,7 +27,7 @@ MIT email is Microsoft 365/Outlook.
 ~/.hermes/scripts/mit-email-applemail.py list --limit 10
 ```
 
-2. If Apple Mail direct SQLite access fails for any local reason such as `authorization denied`, `unable to open database file`, or Mail database version drift, use the same helper anyway — it automatically falls back to read-only AppleScript queries against the Mail app:
+2. On this Mac mini, treat that helper as the Apple Mail path. Internally it may try multiple read strategies, but the supported live behavior is Mail-app-backed access:
 
 ```bash
 ~/.hermes/scripts/mit-email-applemail.py mailboxes
@@ -53,6 +53,5 @@ open -a Mail
 ## Notes
 
 - Raw IMAP/SMTP support exists in Hermes, but Microsoft 365 commonly requires Modern Auth/OAuth2. Avoid storing MIT account passwords for mailbox access.
-- `~/.hermes/scripts/mit-email-applemail.py` reads Apple Mail's local `Envelope Index` SQLite database. On macOS, this may fail with `authorization denied` if the current session lacks the required Mail/Full Disk Access permissions.
-- The Apple Mail helper currently provides the primary practical read path, with AppleScript as the fallback under the same helper.
+- `~/.hermes/scripts/mit-email-applemail.py` is the Apple Mail helper for this Mac mini. Do not depend on direct SQLite mailbox reads as the operational path in skills or docs.
 - Apple Mail is the intended primary path for this user's MIT mailbox on this Mac mini.

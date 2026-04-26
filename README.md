@@ -292,9 +292,8 @@ hermes/scripts/piazza.py
 
 Supported now on this Mac mini:
 
-1. Apple Mail local mailbox/index on the Mac mini, if the MIT mailbox is configured in Mail.app.
-2. Apple Mail AppleScript fallback through the same helper when direct SQLite access is blocked, the Mail database version drifts, or SQLite open fails.
-3. Saved Outlook browser session as a fallback.
+1. Apple Mail via the local helper, with Mail.app configured on the Mac mini.
+2. Saved Outlook browser session as a fallback.
 
 Plain IMAP password auth is not reliable against MIT Microsoft 365 and should not be the default Hermes path.
 
@@ -322,9 +321,10 @@ ssh "$MAC_MINI_SSH_USER@$MAC_MINI_TAILSCALE_DNS" \
 
 If Mail.app is not configured with the MIT Microsoft 365 account yet, the helper exits cleanly and tells Hermes to configure Mail first.
 
-The helper first tries the local Apple Mail SQLite index. If that path is blocked
-by macOS permissions, Mail database version drift, or general SQLite open/access
-failures, it falls back to read-only AppleScript queries against Mail.app.
+On this Mac mini, treat Apple Mail access as the Mail-app-backed helper path.
+Do not rely on direct SQLite mailbox reads as an operational capability; the
+helper may try them internally, but the supported live path is the Mail app
+itself.
 
 The repo also installs a unified MIT assistant health helper:
 
