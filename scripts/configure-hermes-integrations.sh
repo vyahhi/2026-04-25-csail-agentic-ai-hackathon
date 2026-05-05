@@ -136,6 +136,8 @@ remote_env_cmd="$(
   cat <<REMOTE_CMD
 PIAZZA_EMAIL_B64='$(b64 "${PIAZZA_EMAIL:-}")' \
 PIAZZA_PASSWORD_B64='$(b64 "${PIAZZA_PASSWORD:-}")' \
+MIT_EMAIL_ADDRESS_B64='$(b64 "${MIT_EMAIL_ADDRESS:-}")' \
+MIT_EMAIL_PASSWORD_B64='$(b64 "${MIT_EMAIL_PASSWORD:-}")' \
 python3 - <<'PY'
 import base64
 import os
@@ -147,6 +149,8 @@ values = {}
 for key in [
     "PIAZZA_EMAIL",
     "PIAZZA_PASSWORD",
+    "MIT_EMAIL_ADDRESS",
+    "MIT_EMAIL_PASSWORD",
 ]:
     raw = os.environ.get(f"{key}_B64", "")
     value = base64.b64decode(raw).decode() if raw else ""
